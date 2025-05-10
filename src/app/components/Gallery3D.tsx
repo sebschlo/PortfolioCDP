@@ -287,36 +287,17 @@ export default function Gallery3D({
     // Get position from project
     const { x, y } = project.position;
     
-    // Calculate project position in world space
-    let projectWorldPos;
-    switch (wall.id % 4) {
-      case 0: // Front wall
-        projectWorldPos = new THREE.Vector3(-x, y, 10); // Flipped x for front wall
-        break;
-      case 1: // Left wall
-        projectWorldPos = new THREE.Vector3(-10, y, -x);
-        break;
-      case 2: // Back wall
-        projectWorldPos = new THREE.Vector3(-x, y, -10); // Flipped x for back wall
-        break;
-      case 3: // Right wall
-        projectWorldPos = new THREE.Vector3(10, y, x);
-        break;
-      default:
-        projectWorldPos = new THREE.Vector3(-x, y, 10);
-    }
-    
     // Calculate zoom position - slightly in front of the project
     let zoomPos;
     switch (wall.id % 4) {
       case 0: // Front wall
-        zoomPos = new THREE.Vector3(-x, y, 8); // Match flipped x from world position
+        zoomPos = new THREE.Vector3(-x, y, 8);
         break;
       case 1: // Left wall
         zoomPos = new THREE.Vector3(-8, y, -x);
         break;
       case 2: // Back wall
-        zoomPos = new THREE.Vector3(-x, y, -8); // Match flipped x from world position
+        zoomPos = new THREE.Vector3(-x, y, -8);
         break;
       case 3: // Right wall
         zoomPos = new THREE.Vector3(8, y, x);
@@ -325,9 +306,14 @@ export default function Gallery3D({
         zoomPos = new THREE.Vector3(-x, y, 8);
     }
     
+    // Fix rotation for cases 0 and 2 by adding Math.PI
+    const finalRotation = (wall.id % 4 === 0 || wall.id % 4 === 2) 
+      ? wallRotation + Math.PI 
+      : wallRotation;
+    
     setZoomTarget({
       position: zoomPos,
-      rotation: wallRotation
+      rotation: finalRotation
     });
     
     // Call the original click handler after a short delay
