@@ -2,9 +2,9 @@
 title: Interactive Installation
 description: A responsive light and sound installation that reacts to audience movements
 thumbnail: /images/project-1-thumb.svg
-wall: 0
-positionX: -3
-positionY: 1
+wall: 3
+positionX: 3
+positionY: 4
 scale: 1.2
 ---
 

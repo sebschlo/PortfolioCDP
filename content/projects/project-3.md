@@ -2,8 +2,8 @@
 title: Augmented Reality Experience
 description: An AR exploration of cultural heritage sites
 thumbnail: /images/project-4-thumb.svg
-wall: 1
-positionX: -1
+wall: 0
+positionX: 5
 positionY: 0
 scale: 1.1
 ---
