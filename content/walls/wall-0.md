@@ -1,7 +1,7 @@
 ---
 name: Main Gallery Wall
 color: "#2a2a2a"
-texture: "/textures/wall-texture-0.jpg"
+texture: "/textures/wall-texture-0.svg"
 projects:
   - project-1
   - project-2

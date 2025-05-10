@@ -53,7 +53,7 @@ Wall configuration files are located in `content/walls`. Each wall is defined by
 ---
 name: Wall Name
 color: "#hexcolor"
-texture: "/textures/your-texture.jpg" # Optional
+texture: "/textures/your-texture.svg" # Optional
 projects:
   - project-1-id
   - project-2-id
@@ -71,7 +71,7 @@ Project files are located in `content/projects`. Each project is defined by a ma
 ---
 title: Project Title
 description: Short project description
-thumbnail: /images/project-thumbnail.jpg
+thumbnail: /images/project-thumbnail.svg
 wall: 0 # Wall number (0-3)
 positionX: 0 # Position on wall (-5 to 5)
 positionY: 0 # Height on wall (-3 to 3)
@@ -87,7 +87,7 @@ Project content in markdown format...
 - Lists
 - And other markdown elements
 
-![Images](/path/to/image.jpg)
+![Images](/path/to/image.svg)
 ```
 
 ## Customization

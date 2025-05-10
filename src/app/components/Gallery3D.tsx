@@ -284,53 +284,45 @@ export default function Gallery3D({
     // Get wall rotation and base position
     const wallRotation = (wall.id % 4) * (Math.PI / 2);
     
+    // Get position from project
+    const { x, y } = project.position;
+    
     // Calculate project position in world space
-    const { x, y, scale } = project.position;
-    
-    // Base wall positions (center of each wall)
-    const wallPositions = [
-      new THREE.Vector3(0, 0, 10),    // Front wall (z+)
-      new THREE.Vector3(-10, 0, 0),   // Left wall (x-)
-      new THREE.Vector3(0, 0, -10),   // Back wall (z-)
-      new THREE.Vector3(10, 0, 0),    // Right wall (x+)
-    ];
-    
-    // Calculate the project's world position
     let projectWorldPos;
     switch (wall.id % 4) {
       case 0: // Front wall
-        projectWorldPos = new THREE.Vector3(x, y, 10);
+        projectWorldPos = new THREE.Vector3(-x, y, 10); // Flipped x for front wall
         break;
       case 1: // Left wall
         projectWorldPos = new THREE.Vector3(-10, y, -x);
         break;
       case 2: // Back wall
-        projectWorldPos = new THREE.Vector3(-x, y, -10);
+        projectWorldPos = new THREE.Vector3(-x, y, -10); // Flipped x for back wall
         break;
       case 3: // Right wall
         projectWorldPos = new THREE.Vector3(10, y, x);
         break;
       default:
-        projectWorldPos = new THREE.Vector3(x, y, 10);
+        projectWorldPos = new THREE.Vector3(-x, y, 10);
     }
     
     // Calculate zoom position - slightly in front of the project
     let zoomPos;
     switch (wall.id % 4) {
       case 0: // Front wall
-        zoomPos = new THREE.Vector3(x, y, 8); // 2 units inside from front wall
+        zoomPos = new THREE.Vector3(-x, y, 8); // Match flipped x from world position
         break;
       case 1: // Left wall
-        zoomPos = new THREE.Vector3(-8, y, -x); // 2 units inside from left wall
+        zoomPos = new THREE.Vector3(-8, y, -x);
         break;
       case 2: // Back wall
-        zoomPos = new THREE.Vector3(-x, y, -8); // 2 units inside from back wall
+        zoomPos = new THREE.Vector3(-x, y, -8); // Match flipped x from world position
         break;
       case 3: // Right wall
-        zoomPos = new THREE.Vector3(8, y, x); // 2 units inside from right wall
+        zoomPos = new THREE.Vector3(8, y, x);
         break;
       default:
-        zoomPos = new THREE.Vector3(x, y, 8);
+        zoomPos = new THREE.Vector3(-x, y, 8);
     }
     
     setZoomTarget({

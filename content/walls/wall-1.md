@@ -1,7 +1,7 @@
 ---
 name: Left Gallery Wall
 color: "#1f1f1f"
-texture: "/textures/wall-texture-1.jpg"
+texture: "/textures/wall-texture-1.svg"
 projects:
   - project-4
   - project-5

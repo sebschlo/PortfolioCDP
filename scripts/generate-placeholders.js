@@ -28,7 +28,7 @@ dirs.forEach(dir => {
 
 // Generate placeholder project thumbnails
 for (let i = 1; i <= 10; i++) {
-  const imagePath = `public/images/project-${i}-thumb.jpg`;
+  const imagePath = `public/images/project-${i}-thumb.svg`;
   if (!fs.existsSync(imagePath)) {
     // Create a placeholder image using Node's built-in capabilities
     const html = `
@@ -54,7 +54,7 @@ for (let i = 1; i <= 10; i++) {
 
 // Generate placeholder wall textures
 for (let i = 0; i <= 3; i++) {
-  const texturePath = `public/textures/wall-texture-${i}.jpg`;
+  const texturePath = `public/textures/wall-texture-${i}.svg`;
   if (!fs.existsSync(texturePath)) {
     const html = `
       <svg width="1024" height="1024" xmlns="http://www.w3.org/2000/svg">

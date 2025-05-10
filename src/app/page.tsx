@@ -1,9 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { loadGalleryScene } from './utils/gallery';
-import { getAllProjects } from './utils/markdown';
-import { WallType, ProjectType, GalleryScene } from './types';
+import { ProjectType, GalleryScene, WallType } from './types';
 import useScroll from './hooks/useScroll';
 import Gallery3D from './components/Gallery3D';
 import ProjectDetail from './components/ProjectDetail';
@@ -30,16 +28,18 @@ export default function Home() {
   useEffect(() => {
     async function loadData() {
       try {
-        // Load gallery scene and walls
-        const scene = await loadGalleryScene();
+        // Fetch gallery scene and walls from API
+        const res = await fetch('/api/gallery');
+        const scene = await res.json();
         setGalleryScene(scene);
         
-        // Load all projects
-        const allProjects = await getAllProjects();
+        // Fetch all projects from API
+        const projectsRes = await fetch('/api/projects');
+        const allProjects: ProjectType[] = await projectsRes.json();
         
         // Organize projects by wall
         const projectsByWall: Record<number, ProjectType[]> = {};
-        allProjects.forEach(project => {
+        allProjects.forEach((project: ProjectType) => {
           const { wall } = project.position;
           if (!projectsByWall[wall]) {
             projectsByWall[wall] = [];
@@ -140,7 +140,7 @@ export default function Home() {
         gap: '1rem',
         zIndex: 50
       }}>
-        {galleryScene?.walls.map((wall, index) => (
+        {galleryScene?.walls.map((wall: WallType, index: number) => (
           <button 
             key={wall.id}
             style={{
