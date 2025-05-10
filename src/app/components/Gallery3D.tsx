@@ -74,9 +74,9 @@ function Wall({ wall, projects, isActive, onProjectClick }: WallProps) {
   ];
   
   const rotations = [
-    [0, 0, 0],           // Front wall
+    [0, Math.PI, 0],     // Front wall - flipped to face inward
     [0, Math.PI / 2, 0], // Left wall
-    [0, Math.PI, 0],     // Back wall
+    [0, 0, 0],          // Back wall - flipped to face inward
     [0, -Math.PI / 2, 0],// Right wall
   ];
   
