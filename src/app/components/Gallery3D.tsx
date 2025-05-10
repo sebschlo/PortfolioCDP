@@ -209,33 +209,34 @@ interface CameraControllerProps {
 
 function CameraController({ scrollState, animationState }: CameraControllerProps) {
   const { camera } = useThree();
-  const { currentWall } = scrollState;
+  const { currentPosition, progress } = scrollState;
   
   useFrame(() => {
-    // Get the camera position for the current wall
-    const wallCamera = getWallCameraPosition(currentWall);
+    // Calculate rotation directly from the continuous position
+    // Each wall is 90 degrees (PI/2), and we want to rotate counter-clockwise
+    const rotation = -currentPosition * (Math.PI / 2);
     
-    // Calculate target rotation
-    let targetRotation = wallCamera.rotation[1];
+    // Calculate the dynamic distance based on progress
+    const distanceVariation = Math.cos(progress * Math.PI * 2) * 1.5;
+    const baseDistance = 6;
+    const currentDistance = baseDistance + distanceVariation;
     
-    // Ensure counter-clockwise rotation when moving from wall 3 to wall 0
-    if (camera.rotation.y > Math.PI / 2 && targetRotation < Math.PI / 2) {
-      targetRotation += Math.PI * 2;
-    }
+    // Calculate camera position using polar coordinates
+    const x = Math.sin(rotation) * currentDistance;
+    const z = Math.cos(rotation) * currentDistance;
     
     // Smoothly interpolate camera position
     camera.position.lerp(
-      new THREE.Vector3(
-        wallCamera.position[0],
-        wallCamera.position[1],
-        wallCamera.position[2]
-      ),
+      new THREE.Vector3(x, 1.6, z),
       0.05
     );
     
+    // Calculate target rotation to always face center
+    const lookAtRotation = Math.atan2(x, z);
+    
     // Smoothly interpolate camera rotation
     const currentRotation = camera.rotation.y;
-    const rotationDiff = targetRotation - currentRotation;
+    const rotationDiff = lookAtRotation - currentRotation;
     
     // Normalize rotation difference to ensure shortest path
     const normalizedDiff = ((rotationDiff + Math.PI) % (Math.PI * 2)) - Math.PI;

@@ -26,39 +26,30 @@ export default function useScroll({
 
   // Very simple scroll handler - just moves up or down one wall at a time
   const handleScroll = useCallback((e: Event) => {
-    if (!(e instanceof WheelEvent) || scrollLock) return;
+    if (!(e instanceof WheelEvent)) return;
     e.preventDefault();
     
-    // Determine direction from wheel event
-    const direction = e.deltaY > 0 ? 'down' : 'up';
-
+    // Calculate rotation based on scroll delta
+    const rotationDelta = e.deltaY * sensitivity;
+    
     setScrollState(prev => {
-      const currentWall = prev.currentWall;
-      let nextWall = currentWall;
+      // Add to the current position without wrapping
+      const newPosition = prev.currentPosition + rotationDelta;
       
-      // Very simple wall navigation logic - just increment or decrement
-      if (direction === 'down') {
-        nextWall = (currentWall + 1) % totalWalls;
-      } else {
-        nextWall = (currentWall - 1 + totalWalls) % totalWalls;
-      }
+      // Calculate the current wall and progress for UI purposes
+      const currentWall = Math.floor(newPosition) % totalWalls;
+      const progress = newPosition - Math.floor(newPosition);
       
       return {
-        currentPosition: nextWall,
-        targetPosition: nextWall,
-        scrollDirection: direction,
-        currentWall: nextWall,
-        progress: 0, // No partial transitions
+        currentPosition: newPosition,
+        targetPosition: newPosition,
+        scrollDirection: rotationDelta > 0 ? 'down' : 'up',
+        currentWall: currentWall >= 0 ? currentWall : currentWall + totalWalls,
+        progress: progress,
       };
     });
     
-    // Lock scrolling briefly to prevent rapid transitions
-    setScrollLock(true);
-    setTimeout(() => {
-      setScrollLock(false);
-    }, 800); // Longer lock to ensure transitions complete
-    
-  }, [totalWalls, scrollLock]);
+  }, [totalWalls, sensitivity]);
 
   // Set up scroll event listener
   useEffect(() => {
