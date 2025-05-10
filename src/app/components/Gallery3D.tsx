@@ -1,7 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { 
-  OrbitControls, 
   Text, 
   useTexture, 
   PerspectiveCamera
@@ -9,11 +8,50 @@ import {
 import { 
   EffectComposer, 
   Noise, 
-  Glitch 
+  Glitch,
+  Bloom,
+  Vignette
 } from '@react-three/postprocessing';
 import { WallType, ProjectType, ScrollState, AnimationState } from '../types';
-import { getWallCameraPosition } from '../utils/gallery';
+import { getWallCameraPosition, getNextWallId } from '../utils/gallery';
 import * as THREE from 'three';
+
+// Room component that contains all walls
+interface RoomProps {
+  walls: WallType[];
+  projects: Record<number, ProjectType[]>;
+  scrollState: ScrollState;
+  onProjectClick: (project: ProjectType) => void;
+}
+
+function Room({ walls, projects, scrollState, onProjectClick }: RoomProps) {
+  return (
+    <group>
+      {/* Ceiling */}
+      <mesh position={[0, 5, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[20, 20]} />
+        <meshStandardMaterial color="#111111" side={THREE.DoubleSide} />
+      </mesh>
+      
+      {/* Floor */}
+      <mesh position={[0, -5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[20, 20]} />
+        <meshStandardMaterial color="#222222" side={THREE.DoubleSide} />
+      </mesh>
+      
+      {/* Walls */}
+      {walls.map((wall) => (
+        <Wall 
+          key={wall.id} 
+          wall={wall} 
+          projects={projects[wall.id] || []} 
+          isActive={scrollState.currentWall === wall.id}
+          onProjectClick={onProjectClick}
+        />
+      ))}
+    </group>
+  );
+}
 
 // Wall component with projects as "paintings"
 interface WallProps {
@@ -27,7 +65,7 @@ function Wall({ wall, projects, isActive, onProjectClick }: WallProps) {
   // Load texture if provided, otherwise use color
   const texture = wall.texture ? useTexture(wall.texture) : null;
   
-  // Wall position based on ID
+  // Wall position based on ID - making a box shape
   const positions = [
     [0, 0, 10],    // Front wall (z+)
     [-10, 0, 0],   // Left wall (x-)
@@ -45,6 +83,17 @@ function Wall({ wall, projects, isActive, onProjectClick }: WallProps) {
   const position = positions[wall.id % 4];
   const rotation = rotations[wall.id % 4];
   
+  // Opacity animation for the wall name text
+  const [textOpacity, setTextOpacity] = useState(0);
+  
+  useEffect(() => {
+    if (isActive) {
+      setTextOpacity(1);
+    } else {
+      setTextOpacity(0);
+    }
+  }, [isActive]);
+  
   return (
     <group position={position as any} rotation={rotation as any}>
       {/* Wall surface */}
@@ -56,6 +105,23 @@ function Wall({ wall, projects, isActive, onProjectClick }: WallProps) {
           roughness={0.8}
         />
       </mesh>
+      
+      {/* Wall name */}
+      <group position={[0, 4, 0.1]} visible={isActive}>
+        <Text
+          fontSize={0.8}
+          color="#ffffff"
+          anchorX="center"
+          anchorY="middle"
+          outlineColor="#000000"
+          outlineWidth={0.02}
+          // Using material prop instead of opacity for Text
+          material-opacity={textOpacity}
+          material-transparent={true}
+        >
+          {wall.name}
+        </Text>
+      </group>
       
       {/* Projects displayed on the wall */}
       {projects.map((project) => (
@@ -119,7 +185,7 @@ function Project({ project, onClick, isActive }: ProjectProps) {
         />
       </mesh>
       
-      {/* Project title - No font specified to use default */}
+      {/* Project title */}
       <Text
         position={[0, -0.8 * scale, 0.1]}
         fontSize={0.2 * scale}
@@ -135,7 +201,7 @@ function Project({ project, onClick, isActive }: ProjectProps) {
   );
 }
 
-// Camera controller based on scroll state
+// Camera controller based on scroll state - smoother transitions
 interface CameraControllerProps {
   scrollState: ScrollState;
   animationState: AnimationState;
@@ -143,45 +209,39 @@ interface CameraControllerProps {
 
 function CameraController({ scrollState, animationState }: CameraControllerProps) {
   const { camera } = useThree();
-  const { currentPosition, progress } = scrollState;
+  const { currentWall } = scrollState;
   
   useFrame(() => {
-    const targetWallId = Math.floor(currentPosition);
-    const nextWallId = (targetWallId + 1) % 4;
+    // Get the camera position for the current wall
+    const wallCamera = getWallCameraPosition(currentWall);
     
-    // Get camera positions for current and next wall
-    const currentWallCamera = getWallCameraPosition(targetWallId);
-    const nextWallCamera = getWallCameraPosition(nextWallId);
+    // Calculate target rotation
+    let targetRotation = wallCamera.rotation[1];
     
-    // Interpolate between positions based on scroll progress
-    if (progress < 1) {
-      // Position interpolation
-      const x = THREE.MathUtils.lerp(
-        currentWallCamera.position[0],
-        nextWallCamera.position[0],
-        progress
-      );
-      const y = THREE.MathUtils.lerp(
-        currentWallCamera.position[1],
-        nextWallCamera.position[1],
-        progress
-      );
-      const z = THREE.MathUtils.lerp(
-        currentWallCamera.position[2],
-        nextWallCamera.position[2],
-        progress
-      );
-      
-      // Rotation interpolation - simplified
-      const rotY = THREE.MathUtils.lerp(
-        currentWallCamera.rotation[1],
-        nextWallCamera.rotation[1],
-        progress
-      );
-      
-      camera.position.set(x, y, z);
-      camera.rotation.set(0, rotY, 0);
+    // Ensure counter-clockwise rotation when moving from wall 3 to wall 0
+    if (camera.rotation.y > Math.PI / 2 && targetRotation < Math.PI / 2) {
+      targetRotation += Math.PI * 2;
     }
+    
+    // Smoothly interpolate camera position
+    camera.position.lerp(
+      new THREE.Vector3(
+        wallCamera.position[0],
+        wallCamera.position[1],
+        wallCamera.position[2]
+      ),
+      0.05
+    );
+    
+    // Smoothly interpolate camera rotation
+    const currentRotation = camera.rotation.y;
+    const rotationDiff = targetRotation - currentRotation;
+    
+    // Normalize rotation difference to ensure shortest path
+    const normalizedDiff = ((rotationDiff + Math.PI) % (Math.PI * 2)) - Math.PI;
+    
+    // Apply rotation with smoothing
+    camera.rotation.y += normalizedDiff * 0.05;
   });
   
   return null;
@@ -204,38 +264,49 @@ export default function Gallery3D({
   onProjectClick
 }: Gallery3DProps) {
   return (
-    <div className="h-screen w-screen">
-      <Canvas shadows>
+    <div className="absolute inset-0 w-full h-full z-0">
+      <Canvas 
+        className="w-full h-full" 
+        shadows 
+        gl={{ antialias: true }}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%'
+        }}
+      >
         {/* Camera setup */}
         <PerspectiveCamera makeDefault position={[0, 1.6, 5]} fov={75} />
         
         {/* Lighting */}
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
+        <ambientLight intensity={0.4} />
+        <pointLight position={[0, 8, 0]} intensity={0.5} castShadow />
+        <directionalLight position={[5, 5, 5]} intensity={0.8} castShadow />
+        
+        {/* Room with all walls */}
+        <Room 
+          walls={walls} 
+          projects={projects}
+          scrollState={scrollState}
+          onProjectClick={onProjectClick}
+        />
         
         {/* Scroll-based camera movement */}
         <CameraController scrollState={scrollState} animationState={animationState} />
         
-        {/* Walls with projects */}
-        {walls.map((wall) => (
-          <Wall 
-            key={wall.id} 
-            wall={wall} 
-            projects={projects[wall.id] || []} 
-            isActive={scrollState.currentWall === wall.id}
-            onProjectClick={onProjectClick}
-          />
-        ))}
-        
         {/* Post-processing effects */}
-        <EffectComposer enabled={animationState.glitching}>
-          <Noise opacity={0.2} />
+        <EffectComposer>
+          <Noise opacity={animationState.glitching ? 0.2 : 0} />
           <Glitch 
             delay={new THREE.Vector2(1.5, 3.5)}
             duration={new THREE.Vector2(0.6, 1.0)} 
             strength={new THREE.Vector2(0.01, 0.3)}
             active={animationState.glitching}
           />
+          <Bloom intensity={0.2} luminanceThreshold={0.8} />
+          <Vignette darkness={0.4} eskil={false} />
         </EffectComposer>
       </Canvas>
     </div>

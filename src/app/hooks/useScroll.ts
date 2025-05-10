@@ -12,6 +12,7 @@ export default function useScroll({
   scrollContainerRef, 
   sensitivity = 0.01 
 }: UseScrollProps) {
+  // Simple scroll state with just integer positions for reliability
   const [scrollState, setScrollState] = useState<ScrollState>({
     currentPosition: 0,
     targetPosition: 0,
@@ -20,67 +21,44 @@ export default function useScroll({
     progress: 0,
   });
 
+  // Simple scroll lock to prevent rapid scrolling
+  const [scrollLock, setScrollLock] = useState(false);
+
+  // Very simple scroll handler - just moves up or down one wall at a time
   const handleScroll = useCallback((e: Event) => {
-    if (!(e instanceof WheelEvent)) return;
+    if (!(e instanceof WheelEvent) || scrollLock) return;
     e.preventDefault();
+    
+    // Determine direction from wheel event
+    const direction = e.deltaY > 0 ? 'down' : 'up';
 
     setScrollState(prev => {
-      // Calculate new target position
-      const delta = e.deltaY * sensitivity;
-      const newTargetPosition = Math.max(0, Math.min(totalWalls - 0.001, prev.targetPosition + delta));
+      const currentWall = prev.currentWall;
+      let nextWall = currentWall;
       
-      // Calculate current wall and progress
-      const currentWall = Math.floor(newTargetPosition);
-      const progress = newTargetPosition - currentWall;
-      
-      // Determine scroll direction
-      const scrollDirection = delta > 0 ? 'down' : delta < 0 ? 'up' : 'none';
+      // Very simple wall navigation logic - just increment or decrement
+      if (direction === 'down') {
+        nextWall = (currentWall + 1) % totalWalls;
+      } else {
+        nextWall = (currentWall - 1 + totalWalls) % totalWalls;
+      }
       
       return {
-        ...prev,
-        targetPosition: newTargetPosition,
-        scrollDirection,
-        currentWall,
-        progress,
+        currentPosition: nextWall,
+        targetPosition: nextWall,
+        scrollDirection: direction,
+        currentWall: nextWall,
+        progress: 0, // No partial transitions
       };
     });
-  }, [totalWalls, sensitivity]);
-
-  // Update current position with smooth lerping
-  useEffect(() => {
-    let animationFrameId: number;
-    const lerpFactor = 0.1; // Adjust for smoother or faster transitions
-
-    const animate = () => {
-      setScrollState(prev => {
-        const diff = prev.targetPosition - prev.currentPosition;
-        
-        // If we're very close to the target, just snap to it
-        if (Math.abs(diff) < 0.001) {
-          return {
-            ...prev,
-            currentPosition: prev.targetPosition,
-          };
-        }
-        
-        // Lerp to the target position
-        const newPosition = prev.currentPosition + diff * lerpFactor;
-        
-        return {
-          ...prev,
-          currentPosition: newPosition,
-        };
-      });
-      
-      animationFrameId = requestAnimationFrame(animate);
-    };
     
-    animationFrameId = requestAnimationFrame(animate);
+    // Lock scrolling briefly to prevent rapid transitions
+    setScrollLock(true);
+    setTimeout(() => {
+      setScrollLock(false);
+    }, 800); // Longer lock to ensure transitions complete
     
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, []);
+  }, [totalWalls, scrollLock]);
 
   // Set up scroll event listener
   useEffect(() => {
@@ -101,11 +79,13 @@ export default function useScroll({
   // Function to programmatically go to a specific wall
   const goToWall = useCallback((wallIndex: number) => {
     if (wallIndex >= 0 && wallIndex < totalWalls) {
-      setScrollState(prev => ({
-        ...prev,
+      setScrollState({
+        currentPosition: wallIndex,
         targetPosition: wallIndex,
-        scrollDirection: wallIndex > prev.currentWall ? 'down' : 'up',
-      }));
+        scrollDirection: 'none',
+        currentWall: wallIndex,
+        progress: 0,
+      });
     }
   }, [totalWalls]);
 

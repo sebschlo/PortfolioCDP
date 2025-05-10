@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ProjectType } from '../types';
-import { motion } from 'framer-motion';
 
 interface ProjectDetailProps {
   project: ProjectType;
@@ -8,61 +7,120 @@ interface ProjectDetailProps {
 }
 
 export default function ProjectDetail({ project, onClose }: ProjectDetailProps) {
+  // Disable scrolling when modal is open
+  useEffect(() => {
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    document.body.style.overflow = 'hidden';
+    
+    return () => {
+      document.body.style.overflow = originalStyle;
+    };
+  }, []);
+  
   return (
-    <motion.div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-90"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
+    <div 
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+        padding: '20px'
+      }}
+      onClick={onClose}
     >
-      <motion.div 
-        className="bg-gray-900 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto"
-        initial={{ y: 50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: 50, opacity: 0 }}
-        transition={{ 
-          duration: 0.5,
-          type: 'spring',
-          stiffness: 200, 
-          damping: 20 
+      <div 
+        style={{
+          backgroundColor: '#1a1a1a',
+          borderRadius: '8px',
+          width: '100%',
+          maxWidth: '800px',
+          maxHeight: '90vh',
+          overflow: 'auto',
+          position: 'relative',
+          zIndex: 1001
         }}
+        onClick={(e) => e.stopPropagation()}
       >
-        <div className="relative">
-          {/* Header with project image */}
-          <div className="h-64 w-full overflow-hidden relative">
+        {/* Header */}
+        <div style={{ position: 'relative' }}>
+          {/* Project Image */}
+          <div style={{ height: '250px', position: 'relative', overflow: 'hidden' }}>
             <img 
               src={project.thumbnail} 
               alt={project.title} 
-              className="w-full h-full object-cover"
+              style={{ 
+                width: '100%', 
+                height: '100%', 
+                objectFit: 'cover', 
+                objectPosition: 'center'
+              }}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent opacity-80"></div>
+            <div 
+              style={{ 
+                position: 'absolute', 
+                inset: 0,
+                background: 'linear-gradient(transparent, #1a1a1a)',
+                opacity: 0.8
+              }}
+            ></div>
           </div>
           
-          {/* Close button */}
+          {/* Close Button */}
           <button 
-            className="absolute top-4 right-4 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-70 transition-all"
+            style={{
+              position: 'absolute',
+              top: '16px',
+              right: '16px',
+              backgroundColor: 'rgba(0, 0, 0, 0.7)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '50%',
+              width: '40px',
+              height: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer'
+            }}
             onClick={onClose}
+            aria-label="Close"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 18L18 6M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
           
-          {/* Project title */}
-          <div className="absolute bottom-0 left-0 p-6">
-            <h1 className="text-3xl font-bold text-white">{project.title}</h1>
+          {/* Project Title */}
+          <div style={{ position: 'absolute', bottom: 0, left: 0, padding: '24px' }}>
+            <h1 style={{ 
+              fontSize: '30px', 
+              fontWeight: 'bold', 
+              color: 'white',
+              margin: 0
+            }}>
+              {project.title}
+            </h1>
+            <p style={{ color: '#cccccc', marginTop: '8px' }}>
+              {project.description}
+            </p>
           </div>
         </div>
         
-        {/* Project content */}
-        <div className="p-6">
+        {/* Content */}
+        <div style={{ padding: '24px' }}>
           <div 
-            className="prose prose-invert markdown-content max-w-none"
+            className="markdown-content"
             dangerouslySetInnerHTML={{ __html: project.content }}
+            style={{ color: 'white' }}
           />
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 } 
