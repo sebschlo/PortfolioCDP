@@ -1,0 +1,84 @@
+import path from 'path';
+import { GalleryScene, WallType } from '../types';
+
+// Data will be imported directly or fetched from an API endpoint
+const mockWalls: WallType[] = [
+  {
+    id: 0,
+    name: 'Front Wall',
+    color: '#ffffff',
+    texture: '/textures/wall-texture-0.svg',
+    projects: [],
+  },
+  {
+    id: 1,
+    name: 'Left Wall',
+    color: '#f8f8f8',
+    texture: '/textures/wall-texture-1.svg',
+    projects: [],
+  },
+  {
+    id: 2,
+    name: 'Back Wall',
+    color: '#ffffff',
+    texture: '/textures/wall-texture-2.svg',
+    projects: [],
+  },
+  {
+    id: 3,
+    name: 'Right Wall',
+    color: '#f8f8f8',
+    texture: '/textures/wall-texture-3.svg',
+    projects: [],
+  },
+];
+
+export async function loadWallConfig(id: number): Promise<WallType | null> {
+  // In a real application, this could fetch from an API endpoint
+  // that has access to the server's filesystem
+  const wall = mockWalls.find(w => w.id === id);
+  return wall || null;
+}
+
+export async function loadGalleryScene(): Promise<GalleryScene> {
+  const walls: WallType[] = [];
+  
+  // Load walls 0 through 3
+  for (let i = 0; i < 4; i++) {
+    const wall = await loadWallConfig(i);
+    if (wall) {
+      walls.push(wall);
+    } else {
+      // Create a default wall if not found
+      walls.push({
+        id: i,
+        name: `Wall ${i}`,
+        color: '#ffffff',
+        projects: [],
+      });
+    }
+  }
+  
+  return {
+    name: "Main Gallery",
+    walls,
+    initialPosition: {
+      x: 0,
+      y: 1.6, // Approximate eye level
+      z: 0,
+    },
+  };
+}
+
+// Calculate camera positions for each wall
+export function getWallCameraPosition(wallId: number) {
+  const radius = 5; // Distance from center to walls
+  const wallPositions = [
+    { position: [0, 1.6, radius], rotation: [0, 0, 0] }, // Front wall (z+)
+    { position: [-radius, 1.6, 0], rotation: [0, Math.PI / 2, 0] }, // Left wall (x-)
+    { position: [0, 1.6, -radius], rotation: [0, Math.PI, 0] }, // Back wall (z-)
+    { position: [radius, 1.6, 0], rotation: [0, -Math.PI / 2, 0] }, // Right wall (x+)
+  ];
+  
+  return wallPositions[wallId % 4];
+} 
