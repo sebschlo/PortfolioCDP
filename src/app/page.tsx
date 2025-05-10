@@ -15,6 +15,7 @@ export default function Home() {
   const [projects, setProjects] = useState<Record<number, ProjectType[]>>({});
   const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState<ProjectType | null>(null);
+  const [shouldResetZoom, setShouldResetZoom] = useState(false);
   
   // Container ref for scroll handling
   const containerRef = useRef<HTMLDivElement>(null);
@@ -65,7 +66,15 @@ export default function Home() {
   // Close project detail
   const handleCloseProject = () => {
     setSelectedProject(null);
+    setShouldResetZoom(true);
   };
+  
+  // Reset zoom flag after it's been handled
+  useEffect(() => {
+    if (shouldResetZoom) {
+      setShouldResetZoom(false);
+    }
+  }, [shouldResetZoom]);
   
   // Set viewport height for mobile browsers
   useEffect(() => {
@@ -117,6 +126,7 @@ export default function Home() {
             transitioning: false
           }}
           onProjectClick={handleProjectClick}
+          onZoomReset={shouldResetZoom}
         />
       )}
       

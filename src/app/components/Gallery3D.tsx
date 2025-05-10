@@ -205,44 +205,44 @@ function Project({ project, onClick, isActive }: ProjectProps) {
 interface CameraControllerProps {
   scrollState: ScrollState;
   animationState: AnimationState;
+  zoomTarget?: { position: THREE.Vector3; rotation: number } | null;
 }
 
-function CameraController({ scrollState, animationState }: CameraControllerProps) {
+function CameraController({ scrollState, animationState, zoomTarget }: CameraControllerProps) {
   const { camera } = useThree();
   const { currentPosition, progress } = scrollState;
   
   useFrame(() => {
-    // Calculate rotation directly from the continuous position
-    // Each wall is 90 degrees (PI/2), and we want to rotate counter-clockwise
-    const rotation = -currentPosition * (Math.PI / 2);
-    
-    // Calculate the dynamic distance based on progress
-    const distanceVariation = Math.cos(progress * Math.PI * 2) * 1.5;
-    const baseDistance = 6;
-    const currentDistance = baseDistance + distanceVariation;
-    
-    // Calculate camera position using polar coordinates
-    const x = Math.sin(rotation) * currentDistance;
-    const z = Math.cos(rotation) * currentDistance;
-    
-    // Smoothly interpolate camera position
-    camera.position.lerp(
-      new THREE.Vector3(x, 1.6, z),
-      0.05
-    );
-    
-    // Calculate target rotation to always face center
-    const lookAtRotation = Math.atan2(x, z);
-    
-    // Smoothly interpolate camera rotation
-    const currentRotation = camera.rotation.y;
-    const rotationDiff = lookAtRotation - currentRotation;
-    
-    // Normalize rotation difference to ensure shortest path
-    const normalizedDiff = ((rotationDiff + Math.PI) % (Math.PI * 2)) - Math.PI;
-    
-    // Apply rotation with smoothing
-    camera.rotation.y += normalizedDiff * 0.05;
+    if (zoomTarget) {
+      // Zoom to project
+      camera.position.lerp(zoomTarget.position, 0.05);
+      
+      // Smoothly rotate to face the project
+      const currentRotation = camera.rotation.y;
+      const rotationDiff = zoomTarget.rotation - currentRotation;
+      const normalizedDiff = ((rotationDiff + Math.PI) % (Math.PI * 2)) - Math.PI;
+      camera.rotation.y += normalizedDiff * 0.05;
+    } else {
+      // Normal gallery navigation
+      const rotation = -currentPosition * (Math.PI / 2);
+      const distanceVariation = Math.cos(progress * Math.PI * 2) * 1.5;
+      const baseDistance = 6;
+      const currentDistance = baseDistance + distanceVariation;
+      
+      const x = Math.sin(rotation) * currentDistance;
+      const z = Math.cos(rotation) * currentDistance;
+      
+      camera.position.lerp(
+        new THREE.Vector3(x, 1.6, z),
+        0.05
+      );
+      
+      const lookAtRotation = Math.atan2(x, z);
+      const currentRotation = camera.rotation.y;
+      const rotationDiff = lookAtRotation - currentRotation;
+      const normalizedDiff = ((rotationDiff + Math.PI) % (Math.PI * 2)) - Math.PI;
+      camera.rotation.y += normalizedDiff * 0.05;
+    }
   });
   
   return null;
@@ -255,6 +255,7 @@ interface Gallery3DProps {
   scrollState: ScrollState;
   animationState: AnimationState;
   onProjectClick: (project: ProjectType) => void;
+  onZoomReset?: boolean;
 }
 
 export default function Gallery3D({ 
@@ -262,8 +263,87 @@ export default function Gallery3D({
   projects, 
   scrollState, 
   animationState,
-  onProjectClick
+  onProjectClick,
+  onZoomReset
 }: Gallery3DProps) {
+  const [zoomTarget, setZoomTarget] = useState<{ position: THREE.Vector3; rotation: number } | null>(null);
+  
+  // Reset zoom when modal is closed
+  useEffect(() => {
+    if (onZoomReset) {
+      setZoomTarget(null);
+    }
+  }, [onZoomReset]);
+  
+  // Handle project click with zoom
+  const handleProjectClick = (project: ProjectType) => {
+    // Calculate zoom position based on project position
+    const wall = walls.find(w => projects[w.id]?.some(p => p.id === project.id));
+    if (!wall) return;
+    
+    // Get wall rotation and base position
+    const wallRotation = (wall.id % 4) * (Math.PI / 2);
+    
+    // Calculate project position in world space
+    const { x, y, scale } = project.position;
+    
+    // Base wall positions (center of each wall)
+    const wallPositions = [
+      new THREE.Vector3(0, 0, 10),    // Front wall (z+)
+      new THREE.Vector3(-10, 0, 0),   // Left wall (x-)
+      new THREE.Vector3(0, 0, -10),   // Back wall (z-)
+      new THREE.Vector3(10, 0, 0),    // Right wall (x+)
+    ];
+    
+    // Calculate the project's world position
+    let projectWorldPos;
+    switch (wall.id % 4) {
+      case 0: // Front wall
+        projectWorldPos = new THREE.Vector3(x, y, 10);
+        break;
+      case 1: // Left wall
+        projectWorldPos = new THREE.Vector3(-10, y, -x);
+        break;
+      case 2: // Back wall
+        projectWorldPos = new THREE.Vector3(-x, y, -10);
+        break;
+      case 3: // Right wall
+        projectWorldPos = new THREE.Vector3(10, y, x);
+        break;
+      default:
+        projectWorldPos = new THREE.Vector3(x, y, 10);
+    }
+    
+    // Calculate zoom position - slightly in front of the project
+    let zoomPos;
+    switch (wall.id % 4) {
+      case 0: // Front wall
+        zoomPos = new THREE.Vector3(x, y, 8); // 2 units inside from front wall
+        break;
+      case 1: // Left wall
+        zoomPos = new THREE.Vector3(-8, y, -x); // 2 units inside from left wall
+        break;
+      case 2: // Back wall
+        zoomPos = new THREE.Vector3(-x, y, -8); // 2 units inside from back wall
+        break;
+      case 3: // Right wall
+        zoomPos = new THREE.Vector3(8, y, x); // 2 units inside from right wall
+        break;
+      default:
+        zoomPos = new THREE.Vector3(x, y, 8);
+    }
+    
+    setZoomTarget({
+      position: zoomPos,
+      rotation: wallRotation
+    });
+    
+    // Call the original click handler after a short delay
+    setTimeout(() => {
+      onProjectClick(project);
+    }, 1000);
+  };
+  
   return (
     <div className="absolute inset-0 w-full h-full z-0">
       <Canvas 
@@ -291,11 +371,15 @@ export default function Gallery3D({
           walls={walls} 
           projects={projects}
           scrollState={scrollState}
-          onProjectClick={onProjectClick}
+          onProjectClick={handleProjectClick}
         />
         
         {/* Scroll-based camera movement */}
-        <CameraController scrollState={scrollState} animationState={animationState} />
+        <CameraController 
+          scrollState={scrollState} 
+          animationState={animationState}
+          zoomTarget={zoomTarget}
+        />
         
         {/* Post-processing effects */}
         <EffectComposer>
