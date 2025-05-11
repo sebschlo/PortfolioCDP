@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Space Grotesk font */
+@font-face {
+  font-family: 'Space Grotesk';
+  src: url('/fonts/SpaceGrotesk-VariableFont_wght.ttf') format('truetype');
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --foreground-rgb: 255, 255, 255;
   --background-start-rgb: 0, 0, 0;
@@ -13,6 +22,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  font-family: 'Space Grotesk', sans-serif;
 }
 
 html, body {
@@ -25,6 +35,7 @@ html, body {
   scroll-behavior: smooth;
   position: fixed;
   overscroll-behavior: none;
+  font-family: 'Space Grotesk', sans-serif;
 }
 
 body {
@@ -61,20 +72,28 @@ html {
   z-index: 10;
 }
 
+.markdown-content {
+  font-family: 'Space Grotesk', sans-serif;
+}
+
 .markdown-content h1 {
   @apply text-3xl font-bold mb-4;
+  font-family: 'Space Grotesk', sans-serif;
 }
 
 .markdown-content h2 {
   @apply text-2xl font-bold mb-3;
+  font-family: 'Space Grotesk', sans-serif;
 }
 
 .markdown-content p {
   @apply mb-4;
+  font-family: 'Space Grotesk', sans-serif;
 }
 
 .markdown-content ul {
   @apply list-disc pl-5 mb-4;
+  font-family: 'Space Grotesk', sans-serif;
 }
 
 .markdown-content img {

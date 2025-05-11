@@ -16,6 +16,9 @@ import { WallType, ProjectType, ScrollState, AnimationState } from '../types';
 import { getWallCameraPosition, getNextWallId } from '../utils/gallery';
 import * as THREE from 'three';
 
+// Use local Space Grotesk font for Three.js Text components
+const fontUrl = '/fonts/SpaceGrotesk-VariableFont_wght.ttf';
+
 // Room component that contains all walls
 interface RoomProps {
   walls: WallType[];
@@ -109,13 +112,13 @@ function Wall({ wall, projects, isActive, onProjectClick }: WallProps) {
       {/* Wall name */}
       <group position={[0, 4, 0.1]} visible={isActive}>
         <Text
+          font={fontUrl}
           fontSize={0.8}
           color="#ffffff"
           anchorX="center"
           anchorY="middle"
           outlineColor="#000000"
           outlineWidth={0.02}
-          // Using material prop instead of opacity for Text
           material-opacity={textOpacity}
           material-transparent={true}
         >
@@ -187,6 +190,7 @@ function Project({ project, onClick, isActive }: ProjectProps) {
       
       {/* Project title */}
       <Text
+        font={fontUrl}
         position={[0, -0.8 * scale, 0.1]}
         fontSize={0.2 * scale}
         color="#ffffff"

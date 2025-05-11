@@ -35,7 +35,8 @@ export default function ProjectDetail({ project, onClose }: ProjectDetailProps) 
         alignItems: 'center',
         justifyContent: 'center',
         zIndex: 1000,
-        padding: '20px'
+        padding: '20px',
+        fontFamily: 'Space Grotesk, sans-serif'
       }}
       onClick={onClose}
     >
@@ -48,7 +49,8 @@ export default function ProjectDetail({ project, onClose }: ProjectDetailProps) 
           maxHeight: '90vh',
           overflow: 'auto',
           position: 'relative',
-          zIndex: 1001
+          zIndex: 1001,
+          fontFamily: 'Space Grotesk, sans-serif'
         }}
         onClick={(e) => e.stopPropagation()}
         onWheel={handleWheel}
@@ -92,7 +94,8 @@ export default function ProjectDetail({ project, onClose }: ProjectDetailProps) 
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              fontFamily: 'Space Grotesk, sans-serif'
             }}
             onClick={onClose}
             aria-label="Close"
@@ -108,11 +111,16 @@ export default function ProjectDetail({ project, onClose }: ProjectDetailProps) 
               fontSize: '30px', 
               fontWeight: 'bold', 
               color: 'white',
-              margin: 0
+              margin: 0,
+              fontFamily: 'Space Grotesk, sans-serif'
             }}>
               {project.title}
             </h1>
-            <p style={{ color: '#cccccc', marginTop: '8px' }}>
+            <p style={{ 
+              color: '#cccccc', 
+              marginTop: '8px',
+              fontFamily: 'Space Grotesk, sans-serif'
+            }}>
               {project.description}
             </p>
           </div>
@@ -123,7 +131,10 @@ export default function ProjectDetail({ project, onClose }: ProjectDetailProps) 
           <div 
             className="markdown-content"
             dangerouslySetInnerHTML={{ __html: project.content }}
-            style={{ color: 'white' }}
+            style={{ 
+              color: 'white',
+              fontFamily: 'Space Grotesk, sans-serif'
+            }}
           />
         </div>
       </div>

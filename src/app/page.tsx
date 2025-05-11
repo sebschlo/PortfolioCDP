@@ -187,7 +187,8 @@ export default function Home() {
           color: 'white', 
           margin: 0,
           fontSize: '1.125rem',
-          fontWeight: 500
+          fontWeight: 500,
+          fontFamily: 'Space Grotesk, sans-serif'
         }}>
           {galleryScene?.walls[scrollState.currentWall]?.name || 'Gallery'}
         </h2>
