@@ -1,7 +1,7 @@
 ---
 name: Back Gallery Wall
 color: "#232323"
-texture: "/textures/wall-texture-2.svg"
+texture: "/textures/wall-texture-0.png"
 projects:
   - project-6
   - project-7

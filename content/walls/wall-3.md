@@ -1,7 +1,7 @@
 ---
 name: Right Gallery Wall
 color: "#1a1a1a"
-texture: "/textures/wall-texture-3.svg"
+texture: "/textures/wall-texture-0.png"
 projects:
   - project-9
   - project-10

@@ -1,7 +1,7 @@
 ---
-title: Interactive Installation
+title: Spatial Resonance
 description: A responsive light and sound installation that reacts to audience movements
-thumbnail: /images/project-1-thumb.svg
+thumbnail: /images/all3.jpg
 wall: 0
 positionX: -3
 positionY: 1

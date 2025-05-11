@@ -1,8 +1,7 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
+import { Canvas, useFrame, useThree, useLoader } from '@react-three/fiber';
 import { 
   Text, 
-  useTexture, 
   PerspectiveCamera
 } from '@react-three/drei';
 import { 
@@ -25,6 +24,29 @@ interface RoomProps {
   projects: Record<number, ProjectType[]>;
   scrollState: ScrollState;
   onProjectClick: (project: ProjectType) => void;
+}
+
+// Helper function to preload textures
+function preloadTextures(urls: string[]): Promise<Record<string, THREE.Texture>> {
+  const loader = new THREE.TextureLoader();
+  
+  const promises = urls.map(url => 
+    new Promise<[string, THREE.Texture]>((resolve, reject) => {
+      loader.load(url, 
+        texture => resolve([url, texture]),
+        undefined,
+        err => reject(err)
+      );
+    })
+  );
+  
+  return Promise.all(promises).then(results => {
+    const textures: Record<string, THREE.Texture> = {};
+    results.forEach(([url, texture]) => {
+      textures[url] = texture;
+    });
+    return textures;
+  });
 }
 
 function Room({ walls, projects, scrollState, onProjectClick }: RoomProps) {
@@ -65,8 +87,14 @@ interface WallProps {
 }
 
 function Wall({ wall, projects, isActive, onProjectClick }: WallProps) {
-  // Load texture if provided, otherwise use color
-  const texture = wall.texture ? useTexture(wall.texture) : null;
+  // Set up the texture directly using Three.js
+  const wallTexture = useMemo(() => {
+    const texture = new THREE.TextureLoader().load('/textures/wall/Wallpaper001B_1K-JPG_Color.jpg');
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(4, 2);
+    return texture;
+  }, []);
   
   // Wall position based on ID - making a box shape
   const positions = [
@@ -103,8 +131,8 @@ function Wall({ wall, projects, isActive, onProjectClick }: WallProps) {
       <mesh receiveShadow>
         <planeGeometry args={[20, 10]} />
         <meshStandardMaterial 
-          color={wall.color} 
-          map={texture}
+          color="#ffffff" 
+          map={wallTexture}
           roughness={0.8}
         />
       </mesh>
@@ -146,10 +174,40 @@ interface ProjectProps {
   isActive: boolean;
 }
 
+// Store loaded textures to avoid reloading
+const textureCache: Record<string, THREE.Texture> = {};
+
 function Project({ project, onClick, isActive }: ProjectProps) {
   const [hovered, setHovered] = useState(false);
-  const texture = useTexture(project.thumbnail);
   const meshRef = useRef<THREE.Mesh>(null);
+  
+  // Generate a consistent color based on project id for the fallback
+  const projectColor = useMemo(() => {
+    const hash = project.id.split('').reduce((acc, char) => {
+      return char.charCodeAt(0) + ((acc << 5) - acc);
+    }, 0);
+    
+    return new THREE.Color(
+      Math.abs(Math.sin(hash * 0.1)) * 0.5 + 0.5,
+      Math.abs(Math.sin(hash * 0.2)) * 0.5 + 0.5,
+      Math.abs(Math.sin(hash * 0.3)) * 0.5 + 0.5
+    );
+  }, [project.id]);
+  
+  // Create texture directly
+  const texture = useMemo(() => {
+    if (!project.thumbnail) return null;
+    
+    // Check cache first
+    if (textureCache[project.thumbnail]) {
+      return textureCache[project.thumbnail];
+    }
+    
+    // Create new texture
+    const newTexture = new THREE.TextureLoader().load(project.thumbnail);
+    textureCache[project.thumbnail] = newTexture;
+    return newTexture;
+  }, [project.thumbnail]);
   
   // Scale and position based on project configuration
   const { x, y, scale } = project.position;
@@ -182,8 +240,9 @@ function Project({ project, onClick, isActive }: ProjectProps) {
       <mesh ref={meshRef} castShadow>
         <planeGeometry args={[2 * scale, 1.3 * scale]} />
         <meshStandardMaterial 
-          map={texture} 
-          emissive="#fff"
+          map={texture}
+          color={!texture ? projectColor : "#ffffff"}
+          emissive={hovered ? "#fff" : "#aaa"}
           emissiveIntensity={hovered ? 0.4 : 0.1}
         />
       </mesh>
