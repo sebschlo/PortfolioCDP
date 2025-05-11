@@ -19,10 +19,19 @@ export default function Home() {
   const containerRef = useRef<HTMLDivElement>(null);
   
   // Set up very simple scroll-based navigation
-  const { scrollState, goToWall } = useScroll({ 
+  const { scrollState, goToWall, setEnabled: setScrollEnabled } = useScroll({ 
     totalWalls: 4,
     scrollContainerRef: containerRef,
   });
+  
+  // Disable scroll navigation when project modal is open
+  useEffect(() => {
+    if (selectedProject) {
+      setScrollEnabled(false);
+    } else {
+      setScrollEnabled(true);
+    }
+  }, [selectedProject, setScrollEnabled]);
   
   // Load gallery data - simplified
   useEffect(() => {
@@ -127,6 +136,7 @@ export default function Home() {
           }}
           onProjectClick={handleProjectClick}
           onZoomReset={shouldResetZoom}
+          isModalOpen={selectedProject !== null}
         />
       )}
       
@@ -138,7 +148,8 @@ export default function Home() {
         transform: 'translateX(-50%)',
         display: 'flex',
         gap: '1rem',
-        zIndex: 50
+        zIndex: 50,
+        visibility: selectedProject ? 'hidden' : 'visible'
       }}>
         {galleryScene?.walls.map((wall: WallType, index: number) => (
           <button 
@@ -169,7 +180,8 @@ export default function Home() {
         paddingTop: '0.5rem',
         paddingBottom: '0.5rem',
         borderRadius: '9999px',
-        zIndex: 50
+        zIndex: 50,
+        visibility: selectedProject ? 'hidden' : 'visible'
       }}>
         <h2 style={{ 
           color: 'white', 

@@ -206,13 +206,17 @@ interface CameraControllerProps {
   scrollState: ScrollState;
   animationState: AnimationState;
   zoomTarget?: { position: THREE.Vector3; rotation: number } | null;
+  isModalOpen: boolean;
 }
 
-function CameraController({ scrollState, animationState, zoomTarget }: CameraControllerProps) {
+function CameraController({ scrollState, animationState, zoomTarget, isModalOpen }: CameraControllerProps) {
   const { camera } = useThree();
   const { currentPosition, progress } = scrollState;
   
   useFrame(() => {
+    // Don't update camera position based on scroll if modal is open
+    if (isModalOpen) return;
+    
     if (zoomTarget) {
       // Zoom to project
       camera.position.lerp(zoomTarget.position, 0.05);
@@ -256,6 +260,7 @@ interface Gallery3DProps {
   animationState: AnimationState;
   onProjectClick: (project: ProjectType) => void;
   onZoomReset?: boolean;
+  isModalOpen?: boolean;
 }
 
 export default function Gallery3D({ 
@@ -264,7 +269,8 @@ export default function Gallery3D({
   scrollState, 
   animationState,
   onProjectClick,
-  onZoomReset
+  onZoomReset,
+  isModalOpen = false
 }: Gallery3DProps) {
   const [zoomTarget, setZoomTarget] = useState<{ position: THREE.Vector3; rotation: number } | null>(null);
   
@@ -357,6 +363,7 @@ export default function Gallery3D({
           scrollState={scrollState} 
           animationState={animationState}
           zoomTarget={zoomTarget}
+          isModalOpen={isModalOpen}
         />
         
         {/* Post-processing effects */}

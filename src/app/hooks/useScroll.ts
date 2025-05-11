@@ -23,10 +23,13 @@ export default function useScroll({
 
   // Simple scroll lock to prevent rapid scrolling
   const [scrollLock, setScrollLock] = useState(false);
+  
+  // Control whether scroll handling is enabled
+  const [enabled, setEnabled] = useState(true);
 
   // Very simple scroll handler - just moves up or down one wall at a time
   const handleScroll = useCallback((e: Event) => {
-    if (!(e instanceof WheelEvent)) return;
+    if (!(e instanceof WheelEvent) || !enabled) return;
     e.preventDefault();
     
     // Calculate rotation based on scroll delta
@@ -49,14 +52,18 @@ export default function useScroll({
       };
     });
     
-  }, [totalWalls, sensitivity]);
+  }, [totalWalls, sensitivity, enabled]);
 
   // Set up scroll event listener
   useEffect(() => {
     const element = scrollContainerRef?.current || window;
     
     // Prevent default scroll behavior
-    const preventDefaultScroll = (e: Event) => e.preventDefault();
+    const preventDefaultScroll = (e: Event) => {
+      if (enabled) {
+        e.preventDefault();
+      }
+    };
     
     element.addEventListener('wheel', handleScroll, { passive: false });
     element.addEventListener('touchmove', preventDefaultScroll, { passive: false });
@@ -65,7 +72,7 @@ export default function useScroll({
       element.removeEventListener('wheel', handleScroll);
       element.removeEventListener('touchmove', preventDefaultScroll);
     };
-  }, [handleScroll, scrollContainerRef]);
+  }, [handleScroll, scrollContainerRef, enabled]);
   
   // Function to programmatically go to a specific wall
   const goToWall = useCallback((wallIndex: number) => {
@@ -80,5 +87,5 @@ export default function useScroll({
     }
   }, [totalWalls]);
 
-  return { scrollState, goToWall };
+  return { scrollState, goToWall, setEnabled };
 } 

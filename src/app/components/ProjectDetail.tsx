@@ -7,7 +7,7 @@ interface ProjectDetailProps {
 }
 
 export default function ProjectDetail({ project, onClose }: ProjectDetailProps) {
-  // Disable scrolling when modal is open
+  // Disable background scrolling when modal is open
   useEffect(() => {
     const originalStyle = window.getComputedStyle(document.body).overflow;
     document.body.style.overflow = 'hidden';
@@ -16,6 +16,11 @@ export default function ProjectDetail({ project, onClose }: ProjectDetailProps) 
       document.body.style.overflow = originalStyle;
     };
   }, []);
+
+  // Handle modal wheel events to prevent them from propagating to the background
+  const handleWheel = (e: React.WheelEvent) => {
+    e.stopPropagation();
+  };
   
   return (
     <div 
@@ -46,6 +51,7 @@ export default function ProjectDetail({ project, onClose }: ProjectDetailProps) 
           zIndex: 1001
         }}
         onClick={(e) => e.stopPropagation()}
+        onWheel={handleWheel}
       >
         {/* Header */}
         <div style={{ position: 'relative' }}>
