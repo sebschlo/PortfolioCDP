@@ -214,17 +214,6 @@ function Wall({ wall, projects, isActive, onProjectClick }: WallProps) {
   const position = positions[wall.id % 4];
   const rotation = rotations[wall.id % 4];
   
-  // Opacity animation for the wall name text
-  const [textOpacity, setTextOpacity] = useState(0);
-  
-  useEffect(() => {
-    if (isActive) {
-      setTextOpacity(1);
-    } else {
-      setTextOpacity(0);
-    }
-  }, [isActive]);
-  
   return (
     <group position={position as [number, number, number]} rotation={rotation as [number, number, number]}>
       {/* Wall surface */}

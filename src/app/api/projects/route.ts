@@ -2,8 +2,6 @@ import { NextResponse } from 'next/server';
 import path from 'path';
 import fs from 'fs/promises';
 import matter from 'gray-matter';
-import { remark } from 'remark';
-import html from 'remark-html';
 import { ProjectType } from '@/app/types';
 
 
