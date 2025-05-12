@@ -74,6 +74,7 @@ export default function Home() {
     setTimeout(() => {
       console.log("Home: Setting showUI to true.");
       setShowUI(true);
+      setTransitioning(false);
     }, 1500); 
   }, [setShowIntro, setShowUI, setTransitioning]); 
   
@@ -142,7 +143,10 @@ export default function Home() {
           <IntroVideo 
             key="intro"
             splashVideoSrc="/videos/intro.m4v"
-            onComplete={handleIntroComplete}
+            onComplete={() => {
+              console.log("Home: IntroVideo onComplete triggered (skip or natural end)");
+              handleIntroComplete();
+            }}
           />
         </>
       ) : galleryScene ? (
@@ -152,7 +156,7 @@ export default function Home() {
             projects={projects}
             scrollState={scrollState}
             animationState={{ 
-              glitching: true, 
+              glitching: transitioning, 
               videoMode: false,
               transitioning: transitioning 
             }}
@@ -268,6 +272,17 @@ export default function Home() {
             </>
           )}
         </>
+      )}
+      
+      {/* Transition overlay when skipping intro */}
+      {transitioning && (
+        <div 
+          className="fixed inset-0 bg-black z-[1000]"
+          style={{ 
+            opacity: 1,
+            transition: 'opacity 1.5s ease-in-out'
+          }}
+        />
       )}
       
       {selectedProject && (
