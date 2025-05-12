@@ -188,11 +188,17 @@ export default function Home() {
   if (loading) {
     console.log("Home rendering: LOADING_SCREEN");
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-black">
+      <div className="fixed inset-0 flex items-center justify-center bg-black" style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh'
+      }}>
         <div className="loading-spinner" style={{
           position: 'relative',
           width: '60px',
-          height: '60px'
+          height: '60px',
+          margin: '0 auto'
         }}>
           <style jsx>{`
             .loading-spinner:after {
@@ -263,8 +269,39 @@ export default function Home() {
         </>
       ) : (
         <>
-          <div className="fixed inset-0 flex items-center justify-center bg-black">
-            <div className="text-white">Preparing gallery...</div>
+          <div className="fixed inset-0 flex items-center justify-center bg-black" style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100vh'
+          }}>
+            <div className="loading-spinner" style={{
+              position: 'relative',
+              width: '60px',
+              height: '60px',
+              margin: '0 auto'
+            }}>
+              <style jsx>{`
+                .loading-spinner:after {
+                  content: '';
+                  display: block;
+                  width: 40px;
+                  height: 40px;
+                  position: absolute;
+                  top: 50%;
+                  left: 50%;
+                  margin-top: -20px;
+                  margin-left: -20px;
+                  border: 4px solid rgba(255, 255, 255, 0.3);
+                  border-radius: 50%;
+                  border-top-color: white;
+                  animation: spin 1s ease-in-out infinite;
+                }
+                @keyframes spin {
+                  to { transform: rotate(360deg); }
+                }
+              `}</style>
+            </div>
           </div>
         </>
       )}
@@ -427,15 +464,43 @@ export default function Home() {
         </>
       )}
       
-      {/* Transition overlay when skipping intro */}
+      {/* Transition spinner overlay */}
       {transitioning && (
-        <div 
-          className="fixed inset-0 bg-black z-[1000]"
-          style={{ 
-            opacity: 1,
-            transition: 'opacity 1.5s ease-in-out'
-          }}
-        />
+        <div className="fixed inset-0 flex items-center justify-center bg-black z-[999]" style={{ 
+          opacity: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh'
+        }}>
+          <div className="loading-spinner" style={{
+            position: 'relative',
+            width: '60px',
+            height: '60px',
+            margin: '0 auto'
+          }}>
+            <style jsx>{`
+              .loading-spinner:after {
+                content: '';
+                display: block;
+                width: 40px;
+                height: 40px;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                margin-top: -20px;
+                margin-left: -20px;
+                border: 4px solid rgba(255, 255, 255, 0.3);
+                border-radius: 50%;
+                border-top-color: white;
+                animation: spin 1s ease-in-out infinite;
+              }
+              @keyframes spin {
+                to { transform: rotate(360deg); }
+              }
+            `}</style>
+          </div>
+        </div>
       )}
       
       {selectedProject && (
