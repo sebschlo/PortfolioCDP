@@ -131,7 +131,7 @@ export default function Home() {
           projects={projects}
           scrollState={scrollState}
           animationState={{ 
-            glitching: false, 
+            glitching: true, 
             videoMode: false,
             transitioning: false
           }}

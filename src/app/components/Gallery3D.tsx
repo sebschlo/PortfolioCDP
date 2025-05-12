@@ -606,9 +606,9 @@ export default function Gallery3D({
         
         {/* Post-processing effects */}
         <EffectComposer>
-          <Noise opacity={animationState.glitching ? 0.2 : 0} />
+          <Noise opacity={animationState.glitching ? 0.1 : 0} />
           <Glitch 
-            delay={new THREE.Vector2(1.5, 3.5)}
+            delay={new THREE.Vector2(10, 20)}
             duration={new THREE.Vector2(0.6, 1.0)} 
             strength={new THREE.Vector2(0.01, 0.3)}
             active={animationState.glitching}
