@@ -1,53 +1,50 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ProjectType, GalleryScene, WallType } from './types';
 import useScroll from './hooks/useScroll';
 import Gallery3D from './components/Gallery3D';
+import IntroVideo from './components/IntroVideo';
 import ProjectDetail from './components/ProjectDetail';
-import { AnimatePresence } from 'framer-motion';
 
 export default function Home() {
-  // State for gallery data
   const [galleryScene, setGalleryScene] = useState<GalleryScene | null>(null);
   const [projects, setProjects] = useState<Record<number, ProjectType[]>>({});
   const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState<ProjectType | null>(null);
   const [shouldResetZoom, setShouldResetZoom] = useState(false);
+  const [showIntro, setShowIntro] = useState(true);
+  const [transitioning, setTransitioning] = useState(false);
+  const [showUI, setShowUI] = useState(false);
+
+  useEffect(() => {
+    console.log(`Home EFFECT state update: Loading: ${loading}, ShowIntro: ${showIntro}, ShowUI: ${showUI}, Transitioning: ${transitioning}`);
+  }, [loading, showIntro, showUI, transitioning]);
   
-  // Container ref for scroll handling
   const containerRef = useRef<HTMLDivElement>(null);
   
-  // Set up very simple scroll-based navigation
   const { scrollState, goToWall, setEnabled: setScrollEnabled } = useScroll({ 
     totalWalls: 4,
     scrollContainerRef: containerRef,
     initialWall: 0
   });
   
-  // Disable scroll navigation when project modal is open
   useEffect(() => {
-    if (selectedProject) {
-      setScrollEnabled(false);
-    } else {
-      setScrollEnabled(true);
-    }
-  }, [selectedProject, setScrollEnabled]);
+    setScrollEnabled(!selectedProject && !showIntro);
+  }, [selectedProject, showIntro, setScrollEnabled]);
   
-  // Load gallery data - simplified
   useEffect(() => {
+    console.log("Home: Mount effect - starting data load.");
     async function loadData() {
+      console.log("Home: loadData() called.");
       try {
-        // Fetch gallery scene and walls from API
-        const res = await fetch('/api/gallery');
-        const scene = await res.json();
+        const resGallery = await fetch('/api/gallery');
+        const scene = await resGallery.json();
         setGalleryScene(scene);
         
-        // Fetch all projects from API
-        const projectsRes = await fetch('/api/projects');
-        const allProjects: ProjectType[] = await projectsRes.json();
+        const resProjects = await fetch('/api/projects');
+        const allProjects: ProjectType[] = await resProjects.json();
         
-        // Organize projects by wall
         const projectsByWall: Record<number, ProjectType[]> = {};
         allProjects.forEach((project: ProjectType) => {
           const { wall } = project.position;
@@ -58,50 +55,66 @@ export default function Home() {
         });
         
         setProjects(projectsByWall);
-        setLoading(false);
+        console.log("Home: Data fetched. Setting loading to false.");
+        setLoading(false); 
       } catch (error) {
-        console.error('Error loading gallery data:', error);
+        console.error('Home: Error loading gallery data:', error);
+        console.log("Home: Error during data load. Setting loading to false.");
         setLoading(false);
       }
     }
     
     loadData();
-  }, []);
+  }, []); 
+
+  const handleIntroComplete = useCallback(() => {
+    console.log("Home: handleIntroComplete triggered.");
+    setTransitioning(true);
+    setShowIntro(false); 
+    setTimeout(() => {
+      console.log("Home: Setting showUI to true.");
+      setShowUI(true);
+    }, 1500); 
+  }, [setShowIntro, setShowUI, setTransitioning]); 
   
-  // Handle project click - simplified
   const handleProjectClick = (project: ProjectType) => {
     setSelectedProject(project);
   };
   
-  // Close project detail
   const handleCloseProject = () => {
     setSelectedProject(null);
     setShouldResetZoom(true);
   };
   
-  // Reset zoom flag after it's been handled
   useEffect(() => {
     if (shouldResetZoom) {
       setShouldResetZoom(false);
     }
   }, [shouldResetZoom]);
   
-  // Set viewport height for mobile browsers
   useEffect(() => {
     const setVh = () => {
       const vh = window.innerHeight * 0.01;
       document.documentElement.style.setProperty('--vh', `${vh}px`);
     };
-    
     setVh();
     window.addEventListener('resize', setVh);
-    
     return () => {
       window.removeEventListener('resize', setVh);
     };
   }, []);
   
+  useEffect(() => {
+    console.log('[Home DEBUG] MOUNT');
+    return () => {
+      console.log('[Home DEBUG] UNMOUNT');
+    };
+  }, []);
+  
+  console.log(`Home rendering. Loading: ${loading}, ShowIntro: ${showIntro}`);
+
   if (loading) {
+    console.log("Home rendering: LOADING_SCREEN");
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-black">
         <div className="text-white text-2xl">Loading Gallery...</div>
@@ -124,123 +137,145 @@ export default function Home() {
         overflow: 'hidden'
       }}
     >
-      {/* Main 3D Gallery Scene */}
-      {galleryScene && (
-        <Gallery3D 
-          walls={galleryScene.walls}
-          projects={projects}
-          scrollState={scrollState}
-          animationState={{ 
-            glitching: true, 
-            videoMode: false,
-            transitioning: false
-          }}
-          onProjectClick={handleProjectClick}
-          onZoomReset={shouldResetZoom}
-          isModalOpen={selectedProject !== null}
-        />
+      {showIntro ? (
+        <>
+          <IntroVideo 
+            key="intro"
+            splashVideoSrc="/videos/intro.m4v"
+            onComplete={handleIntroComplete}
+          />
+        </>
+      ) : galleryScene ? (
+        <>
+          <Gallery3D 
+            walls={galleryScene.walls}
+            projects={projects}
+            scrollState={scrollState}
+            animationState={{ 
+              glitching: true, 
+              videoMode: false,
+              transitioning: transitioning 
+            }}
+            onProjectClick={handleProjectClick}
+            onZoomReset={shouldResetZoom}
+            isModalOpen={selectedProject !== null}
+          />
+        </>
+      ) : (
+        <>
+          <div className="fixed inset-0 flex items-center justify-center bg-black">
+            <div className="text-white">Preparing gallery...</div>
+          </div>
+        </>
       )}
       
-      {/* Website Title */}
-      <div style={{
-        position: 'fixed',
-        top: '1rem',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        backgroundColor: 'rgba(0, 0, 0, 0.32)',
-        paddingLeft: '2.5rem',
-        paddingRight: '2.5rem',
-        paddingTop: '2.5rem',
-        paddingBottom: '2.5rem',
-        borderRadius: '9999px',
-        zIndex: 50,
-        visibility: selectedProject ? 'hidden' : 'visible',
-        textAlign: 'center'
-      }}>
-        <h1 style={{ 
-          color: 'white', 
-          margin: 0,
-          fontSize: '1.5rem',
-          fontWeight: 700,
-          fontFamily: 'Space Grotesk, sans-serif',
-          marginBottom: '0.5rem',
-          letterSpacing: '0.05em'
-        }}>
-          MS.CDP 2025 Portfolio
-        </h1>
-        <h2 style={{
-          color: 'rgba(255, 255, 255, 0.85)',
-          margin: 0,
-          fontSize: '1.25rem',
-          fontWeight: 500,
-          fontFamily: 'Space Grotesk, sans-serif',
-          letterSpacing: '0.03em'
-        }}>
-          Sebastian Schloesser
-        </h2>
-      </div>
+      {showUI && (
+        <>
+          {/* Website Title */}
+          <div style={{
+            position: 'fixed',
+            top: '1rem',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            backgroundColor: 'rgba(0, 0, 0, 0.32)',
+            paddingLeft: '2.5rem',
+            paddingRight: '2.5rem',
+            paddingTop: '2.5rem',
+            paddingBottom: '2.5rem',
+            borderRadius: '9999px',
+            zIndex: 50,
+            visibility: selectedProject ? 'hidden' : 'visible',
+            opacity: 1,
+            transition: 'opacity 0.5s ease-in-out'
+          }}>
+            <h1 style={{ 
+              color: 'white', 
+              margin: 0,
+              fontSize: '1.5rem',
+              fontWeight: 700,
+              fontFamily: 'Space Grotesk, sans-serif',
+              marginBottom: '0.5rem',
+              letterSpacing: '0.05em',
+            }}>
+              MS.CDP 2025 PORTFOLIO
+            </h1>
+            <h2 style={{
+              color: 'rgba(255, 255, 255, 0.85)',
+              margin: 0,
+              fontSize: '1.25rem',
+              fontWeight: 500,
+              fontFamily: 'Space Grotesk, sans-serif',
+              letterSpacing: '0.03em',
+              textAlign: 'center'
+            }}>
+              Sebastian Schloesser
+            </h2>
+          </div>
+          
+          {galleryScene && (
+            <>
+              <div style={{
+                position: 'fixed',
+                bottom: '2rem',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                display: 'flex',
+                gap: '1rem',
+                zIndex: 50,
+                visibility: selectedProject ? 'hidden' : 'visible',
+                opacity: 1,
+                transition: 'opacity 0.5s ease-in-out'
+              }}>
+                {galleryScene.walls.map((wall: WallType, index: number) => (
+                  <button 
+                    key={wall.id} 
+                    onClick={() => goToWall(index)} 
+                    aria-label={`Go to ${wall.name}`}
+                    style={{
+                      width: '16px',
+                      height: '16px',
+                      borderRadius: '50%',
+                      backgroundColor: scrollState.currentWall === index ? 'white' : 'rgba(255, 255, 255, 0.3)',
+                      cursor: 'pointer',
+                      border: 'none'
+                    }}
+                  />
+                ))}
+              </div>
+              <div style={{
+                position: 'fixed',
+                bottom: '4rem',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                padding: '0.5rem 1rem',
+                borderRadius: '9999px',
+                zIndex: 50,
+                visibility: selectedProject ? 'hidden' : 'visible',
+                opacity: 1,
+                transition: 'opacity 0.5s ease-in-out'
+              }}>
+                <h2 style={{ 
+                  color: 'white', 
+                  margin: 0,
+                  fontSize: '1.125rem',
+                  fontWeight: 500,
+                  fontFamily: 'Space Grotesk, sans-serif'
+                }}>
+                  {galleryScene.walls[scrollState.currentWall]?.name || 'Gallery'}
+                </h2>
+              </div>
+            </>
+          )}
+        </>
+      )}
       
-      {/* Wall navigation dots */}
-      <div style={{
-        position: 'fixed',
-        bottom: '2rem',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        display: 'flex',
-        gap: '1rem',
-        zIndex: 50,
-        visibility: selectedProject ? 'hidden' : 'visible'
-      }}>
-        {galleryScene?.walls.map((wall: WallType, index: number) => (
-          <button 
-            key={wall.id}
-            style={{
-              width: '16px',
-              height: '16px',
-              borderRadius: '50%',
-              backgroundColor: scrollState.currentWall === index ? 'white' : 'rgba(255, 255, 255, 0.3)',
-              cursor: 'pointer',
-              border: 'none'
-            }}
-            onClick={() => goToWall(index)}
-            aria-label={`Go to ${wall.name}`}
-          />
-        ))}
-      </div>
-      
-      {/* Wall name indicator */}
-      <div style={{
-        position: 'fixed',
-        bottom: '4rem',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        backgroundColor: 'rgba(0, 0, 0, 0.6)',
-        paddingLeft: '1rem',
-        paddingRight: '1rem',
-        paddingTop: '0.5rem',
-        paddingBottom: '0.5rem',
-        borderRadius: '9999px',
-        zIndex: 50,
-        visibility: selectedProject ? 'hidden' : 'visible'
-      }}>
-        <h2 style={{ 
-          color: 'white', 
-          margin: 0,
-          fontSize: '1.125rem',
-          fontWeight: 500,
-          fontFamily: 'Space Grotesk, sans-serif'
-        }}>
-          {galleryScene?.walls[scrollState.currentWall]?.name || 'Gallery'}
-        </h2>
-      </div>
-      
-      {/* Project detail modal - no animation */}
-        {selectedProject && (
-          <ProjectDetail 
-            project={selectedProject}
-            onClose={handleCloseProject}
-          />
-        )}
+      {selectedProject && (
+        <ProjectDetail 
+          project={selectedProject}
+          onClose={handleCloseProject}
+        />
+      )}
     </div>
   );
 }
