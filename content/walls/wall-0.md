@@ -1,13 +1,11 @@
 ---
-name: Main Gallery Wall
-color: "#2a2a2a"
+name: About
+color: "#232323"
 texture: "/textures/wall-texture-0.png"
 projects:
-  - project-1
-  - project-2
-  - project-3
+  - about
 ---
 
-# Main Gallery Wall
+# About
 
-This is the front wall of the gallery space. It contains projects 1, 2, and 3. 
+This is the back wall of the gallery space. It contains projects 6, 7, and 8. 

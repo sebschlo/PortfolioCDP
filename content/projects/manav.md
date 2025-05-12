@@ -1,11 +1,11 @@
 ---
-title: Augmented Reality Experience
-description: An AR exploration of cultural heritage sites
-thumbnail: /images/all3.jpg
-wall: 2
-positionX: -1
-positionY: 4
-scale: 1.1
+title: Manav
+description: Posture-based furniture design
+thumbnail: /images/manav.png
+wall: 1
+positionX: 5
+positionY: 2.5
+scale: 1.9
 ---
 
 # Augmented Reality Experience

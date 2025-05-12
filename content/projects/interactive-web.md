@@ -1,11 +1,11 @@
 ---
-title: Spatial Resonance
-description: A responsive light and sound installation that reacts to audience movements
-thumbnail: /images/all3.jpg
-wall: 0
-positionX: -3
-positionY: 1
-scale: 1.2
+title: Interactive Web Design
+description: Applying contemporary web technologies to communicate interactive and spatial information online
+thumbnail: /images/web.png
+wall: 3
+positionX: -7
+positionY: 0
+scale: 1.6
 ---
 
 # Interactive Installation

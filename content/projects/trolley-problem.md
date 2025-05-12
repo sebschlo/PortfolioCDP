@@ -1,11 +1,11 @@
 ---
-title: Digital Landscape
-description: A procedurally generated landscape that evolves over time
-thumbnail: /images/all3.jpg
-wall: 2
-positionX: 0
-positionY: 1
-scale: 1
+title: Trolley Problem
+description: A zine on Generative AI
+thumbnail: /images/TrainBG.png
+wall: 3
+positionX: 7
+positionY: 0
+scale: 1.6
 ---
 
 # Digital Landscape

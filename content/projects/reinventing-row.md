@@ -1,11 +1,11 @@
 ---
-title: Digital Landscape
-description: A procedurally generated landscape that evolves over time
-thumbnail: /images/all3.jpg
-wall: 2
-positionX: 4
-positionY: 1
-scale: 1
+title: Reinventing the Row
+description: Speculating on alternatives to the NYC row home "light court"
+thumbnail: /images/shaft_lighting.png
+wall: 3
+positionX: 0
+positionY: -2
+scale: 1.6
 ---
 
 # Digital Landscape

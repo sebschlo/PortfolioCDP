@@ -1,13 +1,12 @@
 ---
-name: Back Gallery Wall
-color: "#232323"
+name: Spring Semester
+color: "#2a2a2a"
 texture: "/textures/wall-texture-0.png"
 projects:
-  - project-6
-  - project-7
-  - project-8
+  - spatial-resonance
+  - leo-tuvalu
 ---
 
-# Back Gallery Wall
+# Spring Semester
 
-This is the back wall of the gallery space. It contains projects 6, 7, and 8. 
+This is the front wall of the gallery space. It contains projects 1, 2, and 3. 

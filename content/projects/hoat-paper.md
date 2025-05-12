@@ -1,11 +1,11 @@
 ---
-title: Augmented Reality Experience
-description: An AR exploration of cultural heritage sites
-thumbnail: /images/all3.jpg
-wall: 0
-positionX: 5
-positionY: 0
-scale: 1.1
+title: Kurokawa and Metabolism Theory
+description: An analysis of the text 'Metabolism in Architecture' by Kisho Kurokawa
+thumbnail: /images/Kurokawa.png
+wall: 1
+positionX: -6
+positionY: -2.5
+scale: 1.7
 ---
 
 # Augmented Reality Experience

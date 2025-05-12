@@ -1,11 +1,11 @@
 ---
-title: Digital Landscape
-description: A procedurally generated landscape that evolves over time
-thumbnail: /images/all3.jpg
-wall: 0
+title: GIS Explorations
+description: Using machine learning and cartographic techniques to speculate about the nature of data
+thumbnail: /images/map.jpg
+wall: 3
 positionX: 0
-positionY: 1
-scale: 1
+positionY: 3
+scale: 1.6
 ---
 
 # Digital Landscape

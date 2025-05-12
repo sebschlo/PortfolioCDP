@@ -1,11 +1,11 @@
 ---
-title: Augmented Reality Experience
-description: An AR exploration of cultural heritage sites
-thumbnail: /images/all3.jpg
+title: Cellular Disturbance
+description: Manifesting the presence and severity of cell phone distraction through the physical mediums of water and light
+thumbnail: /images/cellular-dist.jpeg
 wall: 1
-positionX: -3
-positionY: 0
-scale: 1.1
+positionX: 3
+positionY: -2.5
+scale: 1.7
 ---
 
 # Augmented Reality Experience

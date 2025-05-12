@@ -1,11 +1,11 @@
 ---
-title: Augmented Reality Experience
-description: An AR exploration of cultural heritage sites
-thumbnail: /images/all3.jpg
+title: Acoustic Computational Modeling
+description: A tool to study a parametric design space in terms of acoustic performance
+thumbnail: /images/acoustic.png
 wall: 1
-positionX: 3
-positionY: 0
-scale: 1.1
+positionX: -6
+positionY: 2.5
+scale: 1.8
 ---
 
 # Augmented Reality Experience
