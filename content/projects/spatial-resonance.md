@@ -12,7 +12,9 @@ scale: 2.7
 
 [Download the App](https://testflight.apple.com/join/cfVqfe6g)
 
-[GSAPP Archive](https://gsapp-cdp.github.io/archive/projects/2025/spatial_resonance/)
+[GSAPP Archive Page](https://gsapp-cdp.github.io/archive/projects/2025/spatial_resonance/)
+
+[See Slides](https://www.figma.com/deck/SLNc9ss1trxO4Wwk6afTNh/Colloq3-Final?node-id=1-34&t=nsQ9hun8s3G6ZxxE-1)
 
 
 # Provocation
@@ -73,7 +75,7 @@ I propose the development of a system for such device pairing and information sh
     style="aspect-ratio: 16 / 9; width: 100%;">
 </iframe>
 
-![Icebreaker Resonator in Action]()
+Icebreaker Resonator in Action
 
 <br></br>
 
@@ -153,7 +155,7 @@ Part of the speculative process is attempting to foresee what kinds of problemat
 
 <img src="/images/spatial-resonance//opinion.png" alt="Google Trends data showing interest in 'phone addiction' and 'digital detox' over time" style="border: 1px solid #ccc; padding: 10px;">
 
-![Kwet's Piece on Bluetooth Surveillance]()
+Kwet's Piece on Bluetooth Surveillance
 
 <br></br>
 

@@ -8,25 +8,12 @@ positionY: 0
 scale: 1.8
 ---
 
-# Interactive Installation
+Throughout my time at GSAPP, I have explored web technologies and their ability to communicate spatial concepts. My previous [portfolio site](https://sebs.gallery) was created with simple full screen video HTML elements. For this portfolio, I've incorporated a three.js virtual environment giving real 3D rendering functionality. 
 
-This interactive installation combines light, sound, and motion sensors to create an immersive environment that responds to audience movement. As visitors move through the space, their presence triggers changes in the lighting and soundscape.
+[Github](https://github.com/sebschlo/PortfolioCDP)
 
-## Technology
+<br></br>
 
-- Custom motion sensors
-- Programmable LED arrays
-- Spatial audio system
-- Real-time data processing
+In the summer colloquium, I also explored scroll animations and storytelling using the [GSAP Library](https://gsap.com/), GLTF animated objects by using Blender, leaflet and MapBox for interactive maps, and tied it all together using React. You can see the results on the [Colloquium I Archive](https://gsapp-cdp.github.io/colloquium-1-2024/work/sebastian-schloesser/), where I begin exploring what Computational Design means to me, and what types of practice I wanted to develop.
 
-## Process
-
-The development of this installation involved close collaboration with sound designers and electrical engineers. We began with a series of prototypes testing different sensor configurations and response patterns.
-
-The final piece uses a network of 24 motion sensors and 64 independently addressable light sources to create a fluid, organic response to human movement.
-
-## Exhibition History
-
-- Museum of Digital Art, 2022
-- International Light Festival, 2021
-- Tech Arts Symposium, 2020 
+[Github](https://github.com/sebschlo/colloquium)

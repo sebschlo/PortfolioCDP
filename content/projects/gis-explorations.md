@@ -8,25 +8,16 @@ positionY: 3
 scale: 1.6
 ---
 
-# Digital Landscape
+## AI is one step ahead of you!
 
-This piece explores the intersection of algorithmic art and natural landscapes. It uses procedural generation techniques to create an ever-evolving digital terrain that responds to environmental data.
+I trained a machine learning model with my Google Maps GPS track history, trying to understand how accurately it might predict my next move. If you click on the map, it will predict what my destination would be if a trip were to start there.
 
-## Technology Used
+[View Interactive Experience by clicking here and scrolling to the end of the section.](https://gsapp-cdp.github.io/colloquium-1-2024/work/sebastian-schloesser/#ethical-predictions) On the map, you can click and observe where the route is predicted based on inference from my trained model.
 
-- WebGL
-- Custom shader programming
-- Live weather data API
-- Procedural noise algorithms
+## Intentional Subliminal Exposure 
 
-## Concept
+This is a dataset of billboards and signage I found, geolocated and annotated [^1]. It was created so that one day augmented reality ad-blockers may be developed. I am using it to explore the subconscious messaging that lingers in the mind after driving by all these impressions. I then merged this data with a navigation network such that routes can be optimized for a particular set of imagery.
 
-The landscape morphs and changes based on real-time weather patterns from various locations around the world. The colors, terrain shapes, and atmospheric effects all shift gradually to reflect these changing conditions.
+[View More Here](https://gsapp-cdp.github.io/colloquium-1-2024/work/sebastian-schloesser/#speculative-data)
 
-Each viewing of the piece is unique, creating a dynamic representation of our constantly changing planet. The work questions the boundaries between natural and digital environments in an age of climate monitoring and satellite imagery.
-
-## Process Documentation
-
-![Process Image](/images/project-2-process.svg)
-
-The development process involved extensive experimentation with different noise algorithms and weather data mappings to find combinations that produced both aesthetically interesting and conceptually meaningful results. 
+[^1]: https://arc.net/l/quote/dsphxjbc

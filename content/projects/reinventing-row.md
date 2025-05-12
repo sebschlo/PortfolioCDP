@@ -8,4 +8,6 @@ positionY: 0
 scale: 1.8
 ---
 
-# Poster
+[View Interactive Site](https://gsapp-cdp.github.io/colloquium-1-2024/work/sebastian-schloesser/#questioning-assumptions)
+
+[View Poster](/files/reinventing-the-row.png)

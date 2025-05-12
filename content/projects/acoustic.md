@@ -8,4 +8,4 @@ positionY: 2.5
 scale: 1.9
 ---
 
-<img src="/images/AcousticCompModeling.png" style="width: 100%; height: auto;">
+[View Poster](/files/AcousticCompModeling.pdf)

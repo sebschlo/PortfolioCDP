@@ -8,25 +8,6 @@ positionY: 1.5
 scale: 2.2
 ---
 
-# Digital Landscape
+[See Slides](https://www.figma.com/deck/boHt6bGKyM6kh8qas8i44Y/Leo-Tuvalu-FINAL?node-id=1-568&viewport=-130%2C-62%2C0.61&t=T3DrGwBOJtTLj5zO-1&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1)
 
-This piece explores the intersection of algorithmic art and natural landscapes. It uses procedural generation techniques to create an ever-evolving digital terrain that responds to environmental data.
-
-## Technology Used
-
-- WebGL
-- Custom shader programming
-- Live weather data API
-- Procedural noise algorithms
-
-## Concept
-
-The landscape morphs and changes based on real-time weather patterns from various locations around the world. The colors, terrain shapes, and atmospheric effects all shift gradually to reflect these changing conditions.
-
-Each viewing of the piece is unique, creating a dynamic representation of our constantly changing planet. The work questions the boundaries between natural and digital environments in an age of climate monitoring and satellite imagery.
-
-## Process Documentation
-
-![Process Image](/images/project-2-process.svg)
-
-The development process involved extensive experimentation with different noise algorithms and weather data mappings to find combinations that produced both aesthetically interesting and conceptually meaningful results. 
+[Download App](https://testflight.apple.com/join/byDXFgeY)
