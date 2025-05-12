@@ -152,12 +152,22 @@ function Wall({ wall, projects, isActive, onProjectClick }: WallProps) {
 }
 
 // Helper component for loading project image texture and applying material
-function ProjectImageMaterial({ thumbnailUrl, hovered }: { thumbnailUrl: string; hovered: boolean }) {
+function ProjectImageMaterial({ 
+  thumbnailUrl, 
+  hovered,
+  onTextureLoaded 
+}: { 
+  thumbnailUrl: string; 
+  hovered: boolean;
+  onTextureLoaded: (texture: THREE.Texture) => void;
+}) {
   const texture = useLoader(THREE.TextureLoader, thumbnailUrl);
-  
-  // Ensure the texture repeats if necessary, though for a single image it might not be.
-  // texture.wrapS = texture.wrapT = THREE.RepeatWrapping; // Example if tiling needed
-  // texture.repeat.set(1, 1);
+
+  useEffect(() => {
+    if (texture) {
+      onTextureLoaded(texture);
+    }
+  }, [texture, onTextureLoaded]);
 
   return (
     <meshLambertMaterial
@@ -179,6 +189,7 @@ interface ProjectProps {
 function Project({ project, onClick, isActive }: ProjectProps) {
   const [hovered, setHovered] = useState(false);
   const meshRef = useRef<THREE.Mesh>(null);
+  const [imageAspectRatio, setImageAspectRatio] = useState<number | null>(null);
 
   const thumbnailPath = useMemo(() => {
     if (!project.thumbnail) return '';
@@ -201,22 +212,43 @@ function Project({ project, onClick, isActive }: ProjectProps) {
 
   const { x, y, scale } = project.position;
 
+  const handleTextureLoaded = (texture: THREE.Texture) => {
+    if (texture.image) {
+      setImageAspectRatio(texture.image.width / texture.image.height);
+    }
+  };
+
+  // Define base dimensions and calculate actual sizes
+  const baseImageHeight = 1.3;
+  const baseFrameBorder = 0.1;
+  const defaultAspectRatio = 16 / 9;
+
+  const currentAspectRatio = imageAspectRatio || defaultAspectRatio;
+
+  const actualImageHeight = baseImageHeight * scale;
+  const actualImageWidth = actualImageHeight * currentAspectRatio;
+
+  const actualFrameWidth = actualImageWidth + (2 * baseFrameBorder * scale);
+  const actualFrameHeight = actualImageHeight + (2 * baseFrameBorder * scale);
+
+  const textYPosition = -(actualImageHeight / 2 + (baseFrameBorder + 0.1) * scale);
+
   useEffect(() => {
     if (!meshRef.current) return;
-    const targetScale = hovered ? scale * 1.05 : scale;
+    const targetGsapScale = hovered ? 1.05 : 1.0;
     gsap.to(meshRef.current.scale, {
-      x: targetScale,
-      y: targetScale,
-      z: 1,
+      x: targetGsapScale,
+      y: targetGsapScale,
+      z: 1, // Keep z-scale at 1 for the image plane
       duration: 0.3,
       ease: "power2.out"
     });
-  }, [hovered, scale]);
+  }, [hovered]); // Removed 'scale' dependency as geometry now includes it, GSAP scales relatively
 
   const fallbackMaterial = (
     <meshStandardMaterial
       color={projectColor}
-      emissive={hovered ? "#fff" : "#aaa"}
+      emissive={hovered ? "#fff" : "#aaa"} // Original fallback emissive
       emissiveIntensity={hovered ? 0.4 : 0.1}
     />
   );
@@ -230,26 +262,30 @@ function Project({ project, onClick, isActive }: ProjectProps) {
     >
       {/* Frame */}
       <mesh castShadow receiveShadow position={[0, 0, -0.01]}>
-        <boxGeometry args={[2.2 * scale, 1.5 * scale, 0.1]} />
+        <boxGeometry args={[actualFrameWidth, actualFrameHeight, 0.1]} />
         <meshStandardMaterial color="#222" />
       </mesh>
 
       {/* Project thumbnail */}
       <mesh ref={meshRef} castShadow position={[0, 0, 0.041]}>
-        <planeGeometry args={[2 * scale, 1.3 * scale]} />
+        <planeGeometry args={[actualImageWidth, actualImageHeight]} />
         {thumbnailPath ? (
-          <React.Suspense fallback={fallbackMaterial}>
-            <ProjectImageMaterial thumbnailUrl={thumbnailPath} hovered={hovered} />
+          <React.Suspense fallback={fallbackMaterial}> {/* Fallback for Suspense can be the same colored plane */}
+            <ProjectImageMaterial 
+              thumbnailUrl={thumbnailPath} 
+              hovered={hovered} 
+              onTextureLoaded={handleTextureLoaded} 
+            />
           </React.Suspense>
         ) : (
-          fallbackMaterial
+          fallbackMaterial // This is used if thumbnailPath is empty
         )}
       </mesh>
 
       {/* Project title */}
       <Text
         font={fontUrl}
-        position={[0, -0.8 * scale, 0.1]}
+        position={[0, textYPosition, 0.1]}
         fontSize={0.2 * scale}
         color="#ffffff"
         anchorX="center"
