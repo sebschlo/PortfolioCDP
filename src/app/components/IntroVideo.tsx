@@ -61,7 +61,7 @@ const IntroVideo: React.FC<IntroVideoProps> = ({ onComplete, splashVideoSrc }) =
       <button 
         className="absolute bottom-8 right-8 bg-black bg-opacity-70 text-white px-6 py-3 rounded-full z-[1010] hover:bg-opacity-90 transition-all border border-white border-opacity-30 flex items-center space-x-2 font-bold text-lg"
         onClick={handleSkip}
-        aria-label="Skip Intro"
+        aria-label="Click anywhere to skip intro"
       >
         <span>Skip Intro</span>
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

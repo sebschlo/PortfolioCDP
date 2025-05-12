@@ -549,9 +549,9 @@ export default function Gallery3D({
         />
         
         {/* Lighting */}
-        <ambientLight intensity={0.8} />
-        <pointLight position={[0, 8, 0]} intensity={0.9} castShadow />
-        <directionalLight position={[5, 5, 5]} intensity={0.9} castShadow />
+        <ambientLight intensity={0.99} />
+        <pointLight position={[0, 8, 0]} intensity={0.99} castShadow />
+        <directionalLight position={[5, 5, 5]} intensity={0.99} castShadow />
         
         {/* Room with all walls */}
         <Room 
@@ -570,7 +570,7 @@ export default function Gallery3D({
         
         {/* Post-processing effects */}
         <EffectComposer>
-          <Noise opacity={animationState.glitching ? 0.1 : 0} />
+          <Noise opacity={animationState.glitching ? 0.05 : 0} />
           <Glitch 
             delay={new THREE.Vector2(10, 20)}
             duration={new THREE.Vector2(0.6, 1.0)} 
