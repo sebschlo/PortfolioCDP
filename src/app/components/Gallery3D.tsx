@@ -65,7 +65,7 @@ function Floor() {
     [colorMap, normalMap, displacementMap, roughnessMap, aoMap].forEach(texture => {
       texture.wrapS = THREE.RepeatWrapping;
       texture.wrapT = THREE.RepeatWrapping;
-      texture.repeat.set(8, 8);
+      texture.repeat.set(0.6, 0.9);
     });
 
     return {
@@ -95,13 +95,50 @@ function Floor() {
   );
 }
 
+// Create a reusable wallpaper texture loader
+function useWallpaperTexture() {
+  return useMemo(() => {
+    const textureLoader = new THREE.TextureLoader();
+    const colorMap = textureLoader.load('/textures/wall/Wallpaper001B_1K-JPG_Color.jpg');
+    const normalMap = textureLoader.load('/textures/wall/Wallpaper001B_1K-JPG_NormalGL.jpg');
+    const displacementMap = textureLoader.load('/textures/wall/Wallpaper001B_1K-JPG_Displacement.jpg');
+    const roughnessMap = textureLoader.load('/textures/wall/Wallpaper001B_1K-JPG_Roughness.jpg');
+
+    // Configure texture wrapping
+    [colorMap, normalMap, displacementMap, roughnessMap].forEach(texture => {
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat.set(7, 4);
+    });
+
+    return {
+      colorMap,
+      normalMap,
+      displacementMap,
+      roughnessMap
+    };
+  }, []);
+}
+
 function Room({ walls, projects, scrollState, onProjectClick }: RoomProps) {
+  // Use the wallpaper texture for the ceiling
+  const wallpaperTexture = useWallpaperTexture();
+  
   return (
     <group>
-      {/* Ceiling */}
+      {/* Ceiling with wallpaper texture */}
       <mesh position={[0, 5, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <planeGeometry args={[20, 20]} />
-        <meshStandardMaterial color="#111111" side={THREE.DoubleSide} />
+        <meshStandardMaterial 
+          map={wallpaperTexture.colorMap}
+          normalMap={wallpaperTexture.normalMap}
+          displacementMap={wallpaperTexture.displacementMap}
+          roughnessMap={wallpaperTexture.roughnessMap}
+          displacementScale={0.1}
+          roughness={0.9}
+          metalness={0.1}
+          side={THREE.DoubleSide}
+        />
       </mesh>
       
       {/* Floor */}
@@ -130,28 +167,57 @@ interface WallProps {
 }
 
 function Wall({ wall, projects, isActive, onProjectClick }: WallProps) {
-  // Set up the texture directly using Three.js
+  // Determine which texture to use based on wall ID
   const wallTexture = useMemo(() => {
     const textureLoader = new THREE.TextureLoader();
-    const colorMap = textureLoader.load('/textures/wall/Wallpaper001B_1K-JPG_Color.jpg');
-    const normalMap = textureLoader.load('/textures/wall/Wallpaper001B_1K-JPG_NormalGL.jpg');
-    const displacementMap = textureLoader.load('/textures/wall/Wallpaper001B_1K-JPG_Displacement.jpg');
-    const roughnessMap = textureLoader.load('/textures/wall/Wallpaper001B_1K-JPG_Roughness.jpg');
+    
+    // For walls 1, 2, and 3, use specific wall images
+    if (wall.id === 0) {
+      const wallImage = textureLoader.load('/textures/wall_0.png');
+      wallImage.wrapS = THREE.ClampToEdgeWrapping;
+      wallImage.wrapT = THREE.ClampToEdgeWrapping;
+      return { colorMap: wallImage };
+    } 
+    if (wall.id === 1) {
+      const wallImage = textureLoader.load('/textures/wall_3.png');
+      wallImage.wrapS = THREE.ClampToEdgeWrapping;
+      wallImage.wrapT = THREE.ClampToEdgeWrapping;
+      return { colorMap: wallImage };
+    } 
+    else if (wall.id === 2) {
+      const wallImage = textureLoader.load('/textures/wall_2.png');
+      wallImage.wrapS = THREE.ClampToEdgeWrapping;
+      wallImage.wrapT = THREE.ClampToEdgeWrapping;
+      return { colorMap: wallImage };
+    }
+    else if (wall.id === 3) {
+      const wallImage = textureLoader.load('/textures/wall_1.png');
+      wallImage.wrapS = THREE.ClampToEdgeWrapping;
+      wallImage.wrapT = THREE.ClampToEdgeWrapping;
+      return { colorMap: wallImage };
+    }
+    // For wall 0 and any other walls, use the default wallpaper texture
+    else {
+      const colorMap = textureLoader.load('/textures/wall/Wallpaper001B_1K-JPG_Color.jpg');
+      const normalMap = textureLoader.load('/textures/wall/Wallpaper001B_1K-JPG_NormalGL.jpg');
+      const displacementMap = textureLoader.load('/textures/wall/Wallpaper001B_1K-JPG_Displacement.jpg');
+      const roughnessMap = textureLoader.load('/textures/wall/Wallpaper001B_1K-JPG_Roughness.jpg');
 
-    // Configure texture wrapping
-    [colorMap, normalMap, displacementMap, roughnessMap].forEach(texture => {
-      texture.wrapS = THREE.RepeatWrapping;
-      texture.wrapT = THREE.RepeatWrapping;
-      texture.repeat.set(8, 4);
-    });
+      // Configure texture wrapping
+      [colorMap, normalMap, displacementMap, roughnessMap].forEach(texture => {
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(8, 4);
+      });
 
-    return {
-      colorMap,
-      normalMap,
-      displacementMap,
-      roughnessMap
-    };
-  }, []);
+      return {
+        colorMap,
+        normalMap,
+        displacementMap,
+        roughnessMap
+      };
+    }
+  }, [wall.id]);
   
   // Wall position based on ID - making a box shape
   const positions = [
@@ -187,15 +253,25 @@ function Wall({ wall, projects, isActive, onProjectClick }: WallProps) {
       {/* Wall surface */}
       <mesh receiveShadow>
         <planeGeometry args={[20, 15]} />
-        <meshStandardMaterial 
-          map={wallTexture.colorMap}
-          normalMap={wallTexture.normalMap}
-          displacementMap={wallTexture.displacementMap}
-          roughnessMap={wallTexture.roughnessMap}
-          displacementScale={0.1}
-          roughness={0.8}
-          metalness={0.2}
-        />
+        {wall.id === 1 || wall.id === 2 || wall.id === 3 ? (
+          // For walls 1, 2, 3 - just use the image texture
+          <meshStandardMaterial 
+            map={wallTexture.colorMap}
+            roughness={0.8}
+            metalness={0.2}
+          />
+        ) : (
+          // For wall 0 - use the full wallpaper texture set
+          <meshStandardMaterial 
+            map={wallTexture.colorMap}
+            normalMap={wallTexture.normalMap}
+            displacementMap={wallTexture.displacementMap}
+            roughnessMap={wallTexture.roughnessMap}
+            displacementScale={0.1}
+            roughness={0.8}
+            metalness={0.2}
+          />
+        )}
       </mesh>
       
       {/* Projects displayed on the wall */}
