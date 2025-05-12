@@ -320,7 +320,7 @@ export default function Home() {
                 left: '50%',
                 transform: 'translateX(-50%)',
                 display: 'flex',
-                gap: '1rem',
+                gap: isMobile ? '1.5rem' : '1rem',
                 zIndex: 50,
                 visibility: selectedProject ? 'hidden' : 'visible',
                 opacity: 1,
@@ -332,13 +332,16 @@ export default function Home() {
                     onClick={() => goToWall(index)} 
                     aria-label={`Go to ${wall.name}`}
                     style={{
-                      width: '16px',
-                      height: '16px',
+                      width: isMobile ? '20px' : '16px',
+                      height: isMobile ? '20px' : '16px',
+                      minWidth: isMobile ? '20px' : '16px',
+                      minHeight: isMobile ? '20px' : '16px',
                       borderRadius: '50%',
                       backgroundColor: scrollState.currentWall === index ? 'white' : 'rgba(255, 255, 255, 0.3)',
                       cursor: 'pointer',
                       border: 'none',
-                      flexShrink: 0 // Prevent dots from being squashed
+                      flexShrink: 0,
+                      display: 'block'
                     }}
                   />
                 ))}

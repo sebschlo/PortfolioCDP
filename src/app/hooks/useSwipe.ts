@@ -27,56 +27,107 @@ export default function useSwipe({
   // Swipe state
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [swipeInProgress, setSwipeInProgress] = useState(false);
+  const [lastSwipePosition, setLastSwipePosition] = useState(initialWall);
   
-  // Minimum swipe distance threshold
+  // Minimum swipe distance threshold for completing a wall transition
   const minSwipeDistance = 50;
+  
+  // Sensitivity factor for gradual movement
+  const swipeSensitivity = 0.005;
+  
+  // Screen width for calculating relative swipe distances
+  const [screenWidth, setScreenWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1000);
+  
+  // Update screen width on resize
+  useEffect(() => {
+    const handleResize = () => setScreenWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Handle touch start
   const handleTouchStart = useCallback((e: TouchEvent) => {
     if (!enabled) return;
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
-  }, [enabled]);
+    setSwipeInProgress(true);
+    setLastSwipePosition(scrollState.currentPosition);
+  }, [enabled, scrollState.currentPosition]);
 
-  // Handle touch move
+  // Handle touch move - gradual movement during swipe
   const handleTouchMove = useCallback((e: TouchEvent) => {
-    if (!enabled) return;
-    setTouchEnd(e.targetTouches[0].clientX);
-  }, [enabled]);
+    if (!enabled || !touchStart || !swipeInProgress) return;
+    
+    const currentX = e.targetTouches[0].clientX;
+    setTouchEnd(currentX);
+    
+    // Calculate the swipe delta as a proportion of screen width
+    const swipeDelta = (touchStart - currentX) * swipeSensitivity;
+    
+    // Update position with smooth movement
+    setScrollState(prev => {
+      // Calculate new position with smooth movement
+      const newPosition = lastSwipePosition + swipeDelta;
+      
+      // Calculate the current wall and progress for UI purposes
+      const normalizedPosition = ((newPosition % totalWalls) + totalWalls) % totalWalls;
+      const currentWall = Math.floor(normalizedPosition);
+      const progress = normalizedPosition - currentWall;
+      
+      return {
+        currentPosition: newPosition,
+        targetPosition: newPosition,
+        scrollDirection: swipeDelta > 0 ? 'down' : 'up',
+        currentWall,
+        progress,
+      };
+    });
+  }, [touchStart, enabled, swipeInProgress, lastSwipePosition, totalWalls, swipeSensitivity]);
 
-  // Handle touch end
+  // Handle touch end - finalize the movement with inertia
   const handleTouchEnd = useCallback(() => {
-    if (!touchStart || !touchEnd || !enabled) return;
+    if (!touchStart || !touchEnd || !enabled || !swipeInProgress) return;
     
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
+    const significantSwipe = isLeftSwipe || isRightSwipe;
     
-    if (isLeftSwipe || isRightSwipe) {
-      // Change wall based on swipe direction
-      setScrollState(prev => {
-        // Calculate the new position
+    // Settle to nearest wall if a significant swipe occurred,
+    // otherwise snap back to the starting position
+    setScrollState(prev => {
+      let targetPosition;
+      
+      if (significantSwipe) {
+        // Round to nearest wall, with a bias in the swipe direction
         const direction = isLeftSwipe ? 1 : -1;
-        const newPosition = prev.currentPosition + direction;
-        
-        // Calculate the current wall with wraparound
-        let currentWall = Math.floor(newPosition) % totalWalls;
-        if (currentWall < 0) currentWall += totalWalls;
-        
-        return {
-          currentPosition: newPosition,
-          targetPosition: newPosition,
-          scrollDirection: isLeftSwipe ? 'down' : 'up', // reusing existing direction names
-          currentWall,
-          progress: 0,
-        };
-      });
-    }
+        const bias = direction * 0.2; // Slight bias to help with momentum feel
+        targetPosition = Math.round(prev.currentPosition + bias);
+      } else {
+        // For very small swipes, snap back to the nearest integer
+        targetPosition = Math.round(prev.currentPosition);
+      }
+      
+      // Ensure we stay within bounds with wraparound
+      const normalizedPosition = ((targetPosition % totalWalls) + totalWalls) % totalWalls;
+      const currentWall = Math.floor(normalizedPosition);
+      const progress = normalizedPosition - currentWall;
+      
+      return {
+        currentPosition: targetPosition,
+        targetPosition,
+        scrollDirection: 'none',
+        currentWall,
+        progress,
+      };
+    });
     
-    // Reset touch state
+    // Reset swipe state
     setTouchStart(null);
     setTouchEnd(null);
-  }, [touchStart, touchEnd, enabled, totalWalls, minSwipeDistance]);
+    setSwipeInProgress(false);
+  }, [touchStart, touchEnd, enabled, swipeInProgress, totalWalls]);
 
   // Set up touch event listeners
   useEffect(() => {
