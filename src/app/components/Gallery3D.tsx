@@ -18,17 +18,23 @@ import gsap from 'gsap';
 // Use local Space Grotesk font for Three.js Text components
 const fontUrl = '/fonts/SpaceGrotesk-VariableFont_wght.ttf';
 
+// Function to detect if device is mobile
+const isMobileDevice = () => {
+  return typeof window !== 'undefined' && window.innerWidth <= 768;
+};
+
 // Room component that contains all walls
 interface RoomProps {
   walls: WallType[];
   projects: Record<number, ProjectType[]>;
   scrollState: ScrollState;
   onProjectClick: (project: ProjectType) => void;
+  isMobile?: boolean;
 }
 
 
 // Floor component with proper texture memoization
-function Floor() {
+function Floor({ isMobile = false }) {
   // Memoize floor textures to prevent recreating them on every render
   const floorTextures = useMemo(() => {
     const textureLoader = new THREE.TextureLoader();
@@ -64,9 +70,10 @@ function Floor() {
         roughnessMap={floorTextures.roughnessMap}
         aoMap={floorTextures.aoMap}
         displacementScale={0.1}
-        roughness={0.8}
-        metalness={0.2}
+        roughness={isMobile ? 0.7 : 0.8}
+        metalness={isMobile ? 0.25 : 0.2}
         side={THREE.DoubleSide}
+        emissive={isMobile ? new THREE.Color(0x111111) : new THREE.Color(0x000000)}
       />
     </mesh>
   );
@@ -97,7 +104,7 @@ function useWallpaperTexture() {
   }, []);
 }
 
-function Room({ walls, projects, scrollState, onProjectClick }: RoomProps) {
+function Room({ walls, projects, scrollState, onProjectClick, isMobile = false }: RoomProps) {
   // Use the wallpaper texture for the ceiling
   const wallpaperTexture = useWallpaperTexture();
   
@@ -112,14 +119,15 @@ function Room({ walls, projects, scrollState, onProjectClick }: RoomProps) {
           displacementMap={wallpaperTexture.displacementMap}
           roughnessMap={wallpaperTexture.roughnessMap}
           displacementScale={0.1}
-          roughness={0.9}
-          metalness={0.1}
+          roughness={isMobile ? 0.8 : 0.9}
+          metalness={isMobile ? 0.15 : 0.1}
           side={THREE.DoubleSide}
+          emissive={isMobile ? new THREE.Color(0x111111) : new THREE.Color(0x000000)}
         />
       </mesh>
       
       {/* Floor */}
-      <Floor />
+      <Floor isMobile={isMobile} />
       
       {/* Walls */}
       {walls.map((wall) => (
@@ -129,6 +137,7 @@ function Room({ walls, projects, scrollState, onProjectClick }: RoomProps) {
           projects={projects[wall.id] || []} 
           isActive={scrollState.currentWall === wall.id}
           onProjectClick={onProjectClick}
+          isMobile={isMobile}
         />
       ))}
     </group>
@@ -141,9 +150,10 @@ interface WallProps {
   projects: ProjectType[];
   isActive: boolean;
   onProjectClick: (project: ProjectType) => void;
+  isMobile?: boolean;
 }
 
-function Wall({ wall, projects, isActive, onProjectClick }: WallProps) {
+function Wall({ wall, projects, isActive, onProjectClick, isMobile = false }: WallProps) {
   // Determine which texture to use based on wall ID
   const wallTexture = useMemo(() => {
     const textureLoader = new THREE.TextureLoader();
@@ -223,8 +233,9 @@ function Wall({ wall, projects, isActive, onProjectClick }: WallProps) {
           // For walls 1, 2, 3 - just use the image texture
           <meshStandardMaterial 
             map={wallTexture.colorMap}
-            roughness={0.8}
-            metalness={0.2}
+            roughness={isMobile ? 0.7 : 0.8}
+            metalness={isMobile ? 0.25 : 0.2}
+            emissive={isMobile ? new THREE.Color(0x111111) : new THREE.Color(0x000000)}
           />
         ) : (
           // For wall 0 - use the full wallpaper texture set
@@ -234,8 +245,9 @@ function Wall({ wall, projects, isActive, onProjectClick }: WallProps) {
             displacementMap={wallTexture.displacementMap}
             roughnessMap={wallTexture.roughnessMap}
             displacementScale={0.1}
-            roughness={0.8}
-            metalness={0.2}
+            roughness={isMobile ? 0.7 : 0.8}
+            metalness={isMobile ? 0.25 : 0.2}
+            emissive={isMobile ? new THREE.Color(0x111111) : new THREE.Color(0x000000)}
           />
         )}
       </mesh>
@@ -247,6 +259,7 @@ function Wall({ wall, projects, isActive, onProjectClick }: WallProps) {
           project={project} 
           onClick={() => onProjectClick(project)} 
           isActive={isActive}
+          isMobile={isMobile}
         />
       ))}
     </group>
@@ -257,11 +270,13 @@ function Wall({ wall, projects, isActive, onProjectClick }: WallProps) {
 function ProjectImageMaterial({ 
   thumbnailUrl, 
   hovered,
-  onTextureLoaded 
+  onTextureLoaded,
+  isMobile = false
 }: { 
   thumbnailUrl: string; 
   hovered: boolean;
   onTextureLoaded: (texture: THREE.Texture) => void;
+  isMobile?: boolean;
 }) {
   const texture = useLoader(THREE.TextureLoader, thumbnailUrl);
 
@@ -274,8 +289,8 @@ function ProjectImageMaterial({
   return (
     <meshLambertMaterial
       map={texture}
-      emissive={hovered ? "#fff" : "#000000"}
-      emissiveIntensity={hovered ? 0.4 : 0.0}
+      emissive={hovered ? "#fff" : isMobile ? "#222222" : "#000000"}
+      emissiveIntensity={hovered ? 0.4 : isMobile ? 0.2 : 0.0}
       // transparent={true} // Add if images have alpha and need transparency
     />
   );
@@ -286,9 +301,10 @@ interface ProjectProps {
   project: ProjectType;
   onClick: () => void;
   isActive: boolean;
+  isMobile?: boolean;
 }
 
-function Project({ project, onClick }: ProjectProps) {
+function Project({ project, onClick, isMobile = false }: ProjectProps) {
   const [hovered, setHovered] = useState(false);
   const meshRef = useRef<THREE.Mesh>(null);
   const [imageAspectRatio, setImageAspectRatio] = useState<number | null>(null);
@@ -365,7 +381,11 @@ function Project({ project, onClick }: ProjectProps) {
       {/* Frame */}
       <mesh castShadow receiveShadow position={[0, 0, -0.01]}>
         <boxGeometry args={[actualFrameWidth, actualFrameHeight, 0.1]} />
-        <meshStandardMaterial color="#222" />
+        <meshStandardMaterial 
+          color="#222" 
+          emissive={isMobile ? new THREE.Color(0x111111) : new THREE.Color(0x000000)}
+          emissiveIntensity={isMobile ? 0.2 : 0}
+        />
       </mesh>
 
       {/* Project thumbnail */}
@@ -376,7 +396,8 @@ function Project({ project, onClick }: ProjectProps) {
             <ProjectImageMaterial 
               thumbnailUrl={thumbnailPath} 
               hovered={hovered} 
-              onTextureLoaded={handleTextureLoaded} 
+              onTextureLoaded={handleTextureLoaded}
+              isMobile={isMobile}
             />
           </React.Suspense>
         ) : (
@@ -473,6 +494,23 @@ export default function Gallery3D({
   isModalOpen = false
 }: Gallery3DProps) {
   const [zoomTarget, setZoomTarget] = useState<{ position: THREE.Vector3; rotation: number } | null>(null);
+  const [isMobile, setIsMobile] = useState(isMobileDevice());
+  
+  // Check for mobile on mount and on resize
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(isMobileDevice());
+    };
+    
+    // Set on mount
+    handleResize();
+    
+    // Add resize listener
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
   
   // Reset zoom when modal is closed
   useEffect(() => {
@@ -528,12 +566,22 @@ export default function Gallery3D({
     }, 1000);
   };
   
+  // Adjust light intensity for mobile
+  const ambientLightIntensity = isMobile ? 1.5 : 0.99;
+  const pointLightIntensity = isMobile ? 1.5 : 0.99;
+  const directionalLightIntensity = isMobile ? 1.5 : 0.99;
+  
   return (
     <div className="absolute inset-0 w-full h-full z-0">
       <Canvas 
         className="w-full h-full" 
         shadows 
-        gl={{ antialias: true }}
+        gl={{ 
+          antialias: true,
+          // For brightness on mobile, use increased exposure but remove encoding/tone mapping props that cause errors
+          // These properties need to be applied in a different way for compatibility
+          toneMappingExposure: isMobile ? 1.2 : 1.0
+        }}
         style={{
           position: 'absolute',
           top: 0,
@@ -542,16 +590,26 @@ export default function Gallery3D({
           height: '100%'
         }}
       >
-
+        {/* Apply post-processing for brightness instead of direct encoding */}
         <PerspectiveCamera 
           position={[0, 1.6, 5]} 
           fov={75} 
         />
         
-        {/* Lighting */}
-        <ambientLight intensity={0.99} />
-        <pointLight position={[0, 8, 0]} intensity={0.99} castShadow />
-        <directionalLight position={[5, 5, 5]} intensity={0.99} castShadow />
+        {/* Lighting - Increased intensity for mobile */}
+        <ambientLight intensity={ambientLightIntensity} />
+        <pointLight position={[0, 8, 0]} intensity={pointLightIntensity} castShadow />
+        <directionalLight position={[5, 5, 5]} intensity={directionalLightIntensity} castShadow />
+        
+        {/* Additional lighting for mobile */}
+        {isMobile && (
+          <>
+            <pointLight position={[0, 0, 5]} intensity={0.8} />
+            <pointLight position={[-5, 2, 0]} intensity={0.8} />
+            <pointLight position={[5, 2, 0]} intensity={0.8} />
+            <pointLight position={[0, 2, -5]} intensity={0.8} />
+          </>
+        )}
         
         {/* Room with all walls */}
         <Room 
@@ -559,6 +617,7 @@ export default function Gallery3D({
           projects={projects}
           scrollState={scrollState}
           onProjectClick={handleProjectClick}
+          isMobile={isMobile}
         />
         
         {/* Scroll-based camera movement */}
@@ -568,7 +627,7 @@ export default function Gallery3D({
           isModalOpen={isModalOpen}
         />
         
-        {/* Post-processing effects */}
+        {/* Post-processing effects - adjusted for mobile */}
         <EffectComposer>
           <Noise opacity={animationState.glitching ? 0.05 : 0} />
           <Glitch 
@@ -577,8 +636,8 @@ export default function Gallery3D({
             strength={new THREE.Vector2(0.01, 0.3)}
             active={animationState.glitching}
           />
-          <Bloom intensity={0.2} luminanceThreshold={0.8} />
-          <Vignette darkness={0.4} eskil={false} />
+          <Bloom intensity={isMobile ? 0.3 : 0.2} luminanceThreshold={isMobile ? 0.7 : 0.8} />
+          <Vignette darkness={isMobile ? 0.3 : 0.4} eskil={false} />
         </EffectComposer>
       </Canvas>
     </div>

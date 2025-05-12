@@ -86,7 +86,7 @@ export default function ProjectDetail({ project: initialProject, onClose }: Proj
           backgroundColor: '#1a1a1a',
           borderRadius: '8px',
           width: '100%',
-          maxWidth: isMobile ? '95%' : '90%',
+          maxWidth: isMobile ? '95%' : '60%',
           maxHeight: isMobile ? '95vh' : '90vh',
           overflow: 'auto',
           position: 'relative',
