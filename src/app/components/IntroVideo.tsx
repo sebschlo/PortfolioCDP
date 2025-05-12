@@ -59,13 +59,37 @@ const IntroVideo: React.FC<IntroVideoProps> = ({ onComplete, splashVideoSrc }) =
         playsInline
       />
       <button 
-        className="absolute bottom-8 right-8 bg-black bg-opacity-70 text-white px-6 py-3 rounded-full z-[1010] hover:bg-opacity-90 transition-all border border-white border-opacity-30 flex items-center space-x-2 font-bold text-lg"
+        style={{
+          position: 'absolute',
+          bottom: '24px',
+          right: '24px',
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+          color: 'white',
+          padding: '0.5rem 1rem',
+          borderRadius: '9999px',
+          zIndex: 1010,
+          border: 'none',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          fontFamily: 'Space Grotesk, sans-serif',
+          fontSize: '0.875rem',
+          fontWeight: 500,
+          transition: 'background-color 0.3s ease'
+        }}
         onClick={handleSkip}
-        aria-label="Click anywhere to skip intro"
+        aria-label="Skip intro"
+        onMouseOver={(e) => {
+          e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+        }}
+        onMouseOut={(e) => {
+          e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.6)';
+        }}
       >
         <span>Skip Intro</span>
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       </button>
     </div>

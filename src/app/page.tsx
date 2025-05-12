@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ProjectType, GalleryScene, WallType } from './types';
 import useSwipe from './hooks/useSwipe';
+import useScroll from './hooks/useScroll';
 import Gallery3D from './components/Gallery3D';
 import IntroVideo from './components/IntroVideo';
 import ProjectDetail from './components/ProjectDetail';
@@ -17,23 +18,93 @@ export default function Home() {
   const [transitioning, setTransitioning] = useState(false);
   const [showUI, setShowUI] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [showSwipeInstructions, setShowSwipeInstructions] = useState(true);
-
+  const [showNavInstructions, setShowNavInstructions] = useState(true);
+  const initialInstructionsShown = useRef(false);
+  
   useEffect(() => {
     console.log(`Home EFFECT state update: Loading: ${loading}, ShowIntro: ${showIntro}, ShowUI: ${showUI}, Transitioning: ${transitioning}`);
   }, [loading, showIntro, showUI, transitioning]);
   
   const containerRef = useRef<HTMLDivElement>(null);
   
-  const { scrollState, goToWall, setEnabled: setScrollEnabled } = useSwipe({ 
+  // Use the proper hook based on device type
+  const swipeControls = useSwipe({ 
     totalWalls: 4,
     scrollContainerRef: containerRef,
     initialWall: 0
   });
   
+  const scrollControls = useScroll({
+    totalWalls: 4,
+    scrollContainerRef: containerRef,
+    initialWall: 0
+  });
+  
+  // Use the appropriate controls based on device type
+  const { scrollState, goToWall, setEnabled: setScrollEnabled } = isMobile ? swipeControls : scrollControls;
+  
+  // Update the mobile detection effect
+  useEffect(() => {
+    const checkMobile = () => {
+      const isMobileView = window.innerWidth <= 768;
+      setIsMobile(isMobileView);
+      
+      // Add a class to body based on screen width that we can use for CSS adjustments
+      if (isMobileView) {
+        document.body.classList.add('is-mobile');
+      } else {
+        document.body.classList.remove('is-mobile');
+      }
+    };
+    
+    // Run on mount
+    checkMobile();
+    
+    // Add event listener for resize
+    window.addEventListener('resize', checkMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
+  
   useEffect(() => {
     setScrollEnabled(!selectedProject && !showIntro);
   }, [selectedProject, showIntro, setScrollEnabled]);
+  
+  // Show navigation instructions only once when UI first appears
+  useEffect(() => {
+    if (showUI && !selectedProject && !initialInstructionsShown.current) {
+      setShowNavInstructions(true);
+      initialInstructionsShown.current = true;
+      
+      const timer = setTimeout(() => {
+        setShowNavInstructions(false);
+      }, 5000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [showUI, selectedProject]);
+  
+  // Dismiss instructions on navigation
+  const handleNavigation = useCallback(() => {
+    setShowNavInstructions(false);
+  }, []);
+  
+  // Add event listeners to dismiss instructions on swipe or scroll
+  useEffect(() => {
+    const element = containerRef.current || window;
+    
+    if (isMobile) {
+      const dismissOnSwipe = () => handleNavigation();
+      element.addEventListener('touchend', dismissOnSwipe);
+      return () => element.removeEventListener('touchend', dismissOnSwipe);
+    } else {
+      const dismissOnScroll = () => handleNavigation();
+      element.addEventListener('wheel', dismissOnScroll);
+      return () => element.removeEventListener('wheel', dismissOnScroll);
+    }
+  }, [isMobile, handleNavigation]);
   
   useEffect(() => {
     console.log("Home: Mount effect - starting data load.");
@@ -114,64 +185,36 @@ export default function Home() {
     };
   }, []);
   
-  // Update the mobile detection effect
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-      
-      // Add a class to body based on screen width that we can use for CSS adjustments
-      if (window.innerWidth <= 768) {
-        document.body.classList.add('is-mobile');
-      } else {
-        document.body.classList.remove('is-mobile');
-      }
-    };
-    
-    // Run on mount
-    checkMobile();
-    
-    // Add event listener for resize
-    window.addEventListener('resize', checkMobile);
-    
-    return () => {
-      window.removeEventListener('resize', checkMobile);
-    };
-  }, []);
-  
-  // Effect to hide swipe instructions after 5 seconds
-  useEffect(() => {
-    if (showUI && !selectedProject) {
-      // Show the instructions when UI becomes visible
-      setShowSwipeInstructions(true);
-      
-      // Hide them after 5 seconds
-      const timer = setTimeout(() => {
-        setShowSwipeInstructions(false);
-      }, 5000);
-      
-      // Clear timer on cleanup
-      return () => clearTimeout(timer);
-    }
-  }, [showUI, selectedProject]);
-  
-  // Show swipe instructions again when changing walls
-  useEffect(() => {
-    if (showUI && !selectedProject) {
-      setShowSwipeInstructions(true);
-      
-      const timer = setTimeout(() => {
-        setShowSwipeInstructions(false);
-      }, 5000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [scrollState.currentWall]);
-  
   if (loading) {
     console.log("Home rendering: LOADING_SCREEN");
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-black">
-        <div className="text-white text-2xl">Loading Gallery...</div>
+        <div className="loading-spinner" style={{
+          position: 'relative',
+          width: '60px',
+          height: '60px'
+        }}>
+          <style jsx>{`
+            .loading-spinner:after {
+              content: '';
+              display: block;
+              width: 40px;
+              height: 40px;
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              margin-top: -20px;
+              margin-left: -20px;
+              border: 4px solid rgba(255, 255, 255, 0.3);
+              border-radius: 50%;
+              border-top-color: white;
+              animation: spin 1s ease-in-out infinite;
+            }
+            @keyframes spin {
+              to { transform: rotate(360deg); }
+            }
+          `}</style>
+        </div>
       </div>
     );
   }
@@ -294,7 +337,8 @@ export default function Home() {
                       borderRadius: '50%',
                       backgroundColor: scrollState.currentWall === index ? 'white' : 'rgba(255, 255, 255, 0.3)',
                       cursor: 'pointer',
-                      border: 'none'
+                      border: 'none',
+                      flexShrink: 0 // Prevent dots from being squashed
                     }}
                   />
                 ))}
@@ -323,36 +367,57 @@ export default function Home() {
                 </h2>
               </div>
               
-              {/* Swipe instruction message */}
+              {/* Navigation instruction message */}
               <div style={{
                 position: 'fixed',
-                bottom: isMobile ? '5rem' : '7rem',
+                bottom: isMobile ? '8.5rem' : '7rem', // Position higher on mobile
                 left: '50%',
                 transform: 'translateX(-50%)',
                 backgroundColor: 'rgba(0, 0, 0, 0.4)',
                 padding: isMobile ? '0.3rem 0.7rem' : '0.5rem 1rem',
                 borderRadius: '9999px',
                 zIndex: 50,
-                visibility: selectedProject || !showSwipeInstructions ? 'hidden' : 'visible',
-                opacity: showSwipeInstructions ? 1 : 0,
+                visibility: selectedProject || !showNavInstructions ? 'hidden' : 'visible',
+                opacity: showNavInstructions ? 1 : 0,
                 transition: 'opacity 0.5s ease-in-out',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem'
               }}>
-                <svg width={isMobile ? "16" : "20"} height={isMobile ? "16" : "20"} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 2L17 12L7 22" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                <span style={{ 
-                  color: 'white', 
-                  fontSize: isMobile ? '0.75rem' : '0.875rem',
-                  fontFamily: 'Space Grotesk, sans-serif'
-                }}>
-                  Swipe to navigate
-                </span>
-                <svg width={isMobile ? "16" : "20"} height={isMobile ? "16" : "20"} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M17 2L7 12L17 22" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                {isMobile ? (
+                  // Swipe icon for mobile
+                  <>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7 2L17 12L7 22" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span style={{ 
+                      color: 'white', 
+                      fontSize: '0.75rem',
+                      fontFamily: 'Space Grotesk, sans-serif'
+                    }}>
+                      Swipe to navigate
+                    </span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M17 2L7 12L17 22" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </>
+                ) : (
+                  // Scroll icon for desktop
+                  <>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="8" y="2" width="8" height="14" rx="4" stroke="white" strokeWidth="2"/>
+                      <line x1="12" y1="6" x2="12" y2="8" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                      <path d="M6 15L12 21L18 15" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span style={{ 
+                      color: 'white', 
+                      fontSize: '0.875rem',
+                      fontFamily: 'Space Grotesk, sans-serif'
+                    }}>
+                      Scroll to navigate
+                    </span>
+                  </>
+                )}
               </div>
             </>
           )}
