@@ -22,6 +22,7 @@ export default function Home() {
   const { scrollState, goToWall, setEnabled: setScrollEnabled } = useScroll({ 
     totalWalls: 4,
     scrollContainerRef: containerRef,
+    initialWall: 0
   });
   
   // Disable scroll navigation when project modal is open

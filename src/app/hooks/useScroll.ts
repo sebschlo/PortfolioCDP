@@ -5,19 +5,21 @@ interface UseScrollProps {
   totalWalls: number;
   scrollContainerRef?: RefObject<HTMLElement | null>;
   sensitivity?: number;
+  initialWall?: number;
 }
 
 export default function useScroll({ 
   totalWalls, 
   scrollContainerRef, 
-  sensitivity = 0.01 
+  sensitivity = 0.01,
+  initialWall = 0
 }: UseScrollProps) {
   // Simple scroll state with just integer positions for reliability
   const [scrollState, setScrollState] = useState<ScrollState>({
-    currentPosition: 0,
-    targetPosition: 0,
+    currentPosition: initialWall,
+    targetPosition: initialWall,
     scrollDirection: 'none',
-    currentWall: 0,
+    currentWall: initialWall,
     progress: 0,
   });
 

@@ -335,11 +335,12 @@ function CameraController({ scrollState, animationState, zoomTarget, isModalOpen
       const z = Math.cos(rotation) * currentDistance;
       
       camera.position.lerp(
-        new THREE.Vector3(x, 1.6, z),
+        new THREE.Vector3(-x, 1.6, -z),
         0.05
       );
       
-      const lookAtRotation = Math.atan2(x, z);
+      // CORRECTED: Make camera look towards origin/current wall segment
+      const lookAtRotation = Math.atan2(-x, -z);
       const currentRotation = camera.rotation.y;
       const rotationDiff = lookAtRotation - currentRotation;
       const normalizedDiff = ((rotationDiff + Math.PI) % (Math.PI * 2)) - Math.PI;
@@ -440,8 +441,11 @@ export default function Gallery3D({
           height: '100%'
         }}
       >
-        {/* Camera setup */}
-        <PerspectiveCamera makeDefault position={[0, 1.6, 5]} fov={75} />
+
+        <PerspectiveCamera 
+          position={[0, 1.6, 5]} 
+          fov={75} 
+        />
         
         {/* Lighting */}
         <ambientLight intensity={0.4} />
