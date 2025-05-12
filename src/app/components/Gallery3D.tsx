@@ -138,23 +138,6 @@ function Wall({ wall, projects, isActive, onProjectClick }: WallProps) {
         />
       </mesh>
       
-      {/* Wall name */}
-      <group position={[0, 4, 0.1]} visible={isActive}>
-        <Text
-          font={fontUrl}
-          fontSize={0.8}
-          color="#ffffff"
-          anchorX="center"
-          anchorY="middle"
-          outlineColor="#000000"
-          outlineWidth={0.02}
-          material-opacity={textOpacity}
-          material-transparent={true}
-        >
-          {wall.name}
-        </Text>
-      </group>
-      
       {/* Projects displayed on the wall */}
       {projects.map((project) => (
         <Project 
@@ -179,8 +162,8 @@ function ProjectImageMaterial({ thumbnailUrl, hovered }: { thumbnailUrl: string;
   return (
     <meshLambertMaterial
       map={texture}
-      emissive={hovered ? "#fff" : "#aaa"}
-      emissiveIntensity={hovered ? 0.4 : 0.1}
+      emissive={hovered ? "#fff" : "#000000"}
+      emissiveIntensity={hovered ? 0.4 : 0.0}
       // transparent={true} // Add if images have alpha and need transparency
     />
   );
