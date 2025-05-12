@@ -50,6 +50,51 @@ function preloadTextures(urls: string[]): Promise<Record<string, THREE.Texture>>
   });
 }
 
+// Floor component with proper texture memoization
+function Floor() {
+  // Memoize floor textures to prevent recreating them on every render
+  const floorTextures = useMemo(() => {
+    const textureLoader = new THREE.TextureLoader();
+    const colorMap = textureLoader.load('/textures/floor/Concrete030_1K-JPG_Color.jpg');
+    const normalMap = textureLoader.load('/textures/floor/Concrete030_1K-JPG_NormalGL.jpg');
+    const displacementMap = textureLoader.load('/textures/floor/Concrete030_1K-JPG_Displacement.jpg');
+    const roughnessMap = textureLoader.load('/textures/floor/Concrete030_1K-JPG_Roughness.jpg');
+    const aoMap = textureLoader.load('/textures/floor/Concrete030_1K-JPG_AmbientOcclusion.jpg');
+
+    // Configure texture wrapping
+    [colorMap, normalMap, displacementMap, roughnessMap, aoMap].forEach(texture => {
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat.set(8, 8);
+    });
+
+    return {
+      colorMap,
+      normalMap,
+      displacementMap,
+      roughnessMap,
+      aoMap
+    };
+  }, []);
+
+  return (
+    <mesh position={[0, -5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      <planeGeometry args={[20, 20]} />
+      <meshStandardMaterial 
+        map={floorTextures.colorMap}
+        normalMap={floorTextures.normalMap}
+        displacementMap={floorTextures.displacementMap}
+        roughnessMap={floorTextures.roughnessMap}
+        aoMap={floorTextures.aoMap}
+        displacementScale={0.1}
+        roughness={0.8}
+        metalness={0.2}
+        side={THREE.DoubleSide}
+      />
+    </mesh>
+  );
+}
+
 function Room({ walls, projects, scrollState, onProjectClick }: RoomProps) {
   return (
     <group>
@@ -60,10 +105,7 @@ function Room({ walls, projects, scrollState, onProjectClick }: RoomProps) {
       </mesh>
       
       {/* Floor */}
-      <mesh position={[0, -5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[20, 20]} />
-        <meshStandardMaterial color="#222222" side={THREE.DoubleSide} />
-      </mesh>
+      <Floor />
       
       {/* Walls */}
       {walls.map((wall) => (
@@ -90,11 +132,25 @@ interface WallProps {
 function Wall({ wall, projects, isActive, onProjectClick }: WallProps) {
   // Set up the texture directly using Three.js
   const wallTexture = useMemo(() => {
-    const texture = new THREE.TextureLoader().load('/textures/wall/Wallpaper001B_1K-JPG_Color.jpg');
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(8, 4); // Increased tiling frequency - smaller chunks
-    return texture;
+    const textureLoader = new THREE.TextureLoader();
+    const colorMap = textureLoader.load('/textures/wall/Wallpaper001B_1K-JPG_Color.jpg');
+    const normalMap = textureLoader.load('/textures/wall/Wallpaper001B_1K-JPG_NormalGL.jpg');
+    const displacementMap = textureLoader.load('/textures/wall/Wallpaper001B_1K-JPG_Displacement.jpg');
+    const roughnessMap = textureLoader.load('/textures/wall/Wallpaper001B_1K-JPG_Roughness.jpg');
+
+    // Configure texture wrapping
+    [colorMap, normalMap, displacementMap, roughnessMap].forEach(texture => {
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat.set(8, 4);
+    });
+
+    return {
+      colorMap,
+      normalMap,
+      displacementMap,
+      roughnessMap
+    };
   }, []);
   
   // Wall position based on ID - making a box shape
@@ -130,11 +186,15 @@ function Wall({ wall, projects, isActive, onProjectClick }: WallProps) {
     <group position={position as any} rotation={rotation as any}>
       {/* Wall surface */}
       <mesh receiveShadow>
-        <planeGeometry args={[20, 10]} />
+        <planeGeometry args={[20, 15]} />
         <meshStandardMaterial 
-          color="#ffffff" 
-          map={wallTexture}
+          map={wallTexture.colorMap}
+          normalMap={wallTexture.normalMap}
+          displacementMap={wallTexture.displacementMap}
+          roughnessMap={wallTexture.roughnessMap}
+          displacementScale={0.1}
           roughness={0.8}
+          metalness={0.2}
         />
       </mesh>
       
