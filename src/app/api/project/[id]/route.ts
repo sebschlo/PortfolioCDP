@@ -5,6 +5,7 @@ import matter from 'gray-matter';
 import { remark } from 'remark';
 import html from 'remark-html';
 import { ProjectType } from '@/app/types';
+import type { NextRequest } from 'next/server';
 
 async function convertMarkdownToHtml(markdown: string): Promise<string> {
   try {
@@ -68,9 +69,15 @@ async function getFullProjectData(id: string): Promise<ProjectType | null> {
   }
 }
 
+type RouteParams = {
+  params: {
+    id: string;
+  };
+};
+
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: RouteParams
 ) {
   try {
     const { id } = params;

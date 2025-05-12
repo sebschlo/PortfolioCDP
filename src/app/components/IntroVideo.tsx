@@ -1,7 +1,5 @@
 import React, { useRef, useEffect } from 'react';
 
-type VideoMode = 'splash' | 'enter';
-
 interface IntroVideoProps {
   onComplete: () => void;
   splashVideoSrc: string;

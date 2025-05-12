@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { AnimationState } from '../types';
 import gsap from 'gsap';
 

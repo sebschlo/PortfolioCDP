@@ -22,9 +22,6 @@ export default function useScroll({
     currentWall: initialWall,
     progress: 0,
   });
-
-  // Simple scroll lock to prevent rapid scrolling
-  const [scrollLock, setScrollLock] = useState(false);
   
   // Control whether scroll handling is enabled
   const [enabled, setEnabled] = useState(true);

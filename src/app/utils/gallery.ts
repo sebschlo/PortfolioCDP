@@ -1,5 +1,3 @@
-import { GalleryScene, WallType } from '../types';
-
 // Calculate camera positions for left-to-right rotation with fixed viewpoints
 export function getWallCameraPosition(wallId: number) {
   const distance = 5; // Distance from center to camera viewing position

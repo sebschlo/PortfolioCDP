@@ -12,7 +12,6 @@ import {
   Vignette
 } from '@react-three/postprocessing';
 import { WallType, ProjectType, ScrollState, AnimationState } from '../types';
-import { getWallCameraPosition, getNextWallId } from '../utils/gallery';
 import * as THREE from 'three';
 import gsap from 'gsap';
 
@@ -27,28 +26,6 @@ interface RoomProps {
   onProjectClick: (project: ProjectType) => void;
 }
 
-// Helper function to preload textures
-function preloadTextures(urls: string[]): Promise<Record<string, THREE.Texture>> {
-  const loader = new THREE.TextureLoader();
-  
-  const promises = urls.map(url => 
-    new Promise<[string, THREE.Texture]>((resolve, reject) => {
-      loader.load(url, 
-        texture => resolve([url, texture]),
-        undefined,
-        err => reject(err)
-      );
-    })
-  );
-  
-  return Promise.all(promises).then(results => {
-    const textures: Record<string, THREE.Texture> = {};
-    results.forEach(([url, texture]) => {
-      textures[url] = texture;
-    });
-    return textures;
-  });
-}
 
 // Floor component with proper texture memoization
 function Floor() {
@@ -249,7 +226,7 @@ function Wall({ wall, projects, isActive, onProjectClick }: WallProps) {
   }, [isActive]);
   
   return (
-    <group position={position as any} rotation={rotation as any}>
+    <group position={position as [number, number, number]} rotation={rotation as [number, number, number]}>
       {/* Wall surface */}
       <mesh receiveShadow>
         <planeGeometry args={[20, 15]} />
@@ -322,7 +299,7 @@ interface ProjectProps {
   isActive: boolean;
 }
 
-function Project({ project, onClick, isActive }: ProjectProps) {
+function Project({ project, onClick }: ProjectProps) {
   const [hovered, setHovered] = useState(false);
   const meshRef = useRef<THREE.Mesh>(null);
   const [imageAspectRatio, setImageAspectRatio] = useState<number | null>(null);
@@ -438,12 +415,11 @@ function Project({ project, onClick, isActive }: ProjectProps) {
 // Camera controller based on scroll state - smoother transitions
 interface CameraControllerProps {
   scrollState: ScrollState;
-  animationState: AnimationState;
   zoomTarget?: { position: THREE.Vector3; rotation: number } | null;
   isModalOpen: boolean;
 }
 
-function CameraController({ scrollState, animationState, zoomTarget, isModalOpen }: CameraControllerProps) {
+function CameraController({ scrollState, zoomTarget, isModalOpen }: CameraControllerProps) {
   const { camera } = useThree();
   const { currentPosition, progress } = scrollState;
   
@@ -599,7 +575,6 @@ export default function Gallery3D({
         {/* Scroll-based camera movement */}
         <CameraController 
           scrollState={scrollState} 
-          animationState={animationState}
           zoomTarget={zoomTarget}
           isModalOpen={isModalOpen}
         />

@@ -6,18 +6,6 @@ import { remark } from 'remark';
 import html from 'remark-html';
 import { ProjectType } from '@/app/types';
 
-async function convertMarkdownToHtml(markdown: string): Promise<string> {
-  try {
-    // Configure remark-html to preserve raw HTML from the markdown
-    const result = await remark()
-      .use(html, { sanitize: false }) // Disable sanitization to preserve raw HTML
-      .process(markdown);
-    return result.toString();
-  } catch (error) {
-    console.error('Error converting markdown to HTML:', error);
-    return markdown; // Return original markdown if conversion fails
-  }
-}
 
 async function getProjectMetadata(id: string): Promise<ProjectType | null> {
   try {
