@@ -584,9 +584,9 @@ export default function Gallery3D({
         />
         
         {/* Lighting */}
-        <ambientLight intensity={0.4} />
-        <pointLight position={[0, 8, 0]} intensity={0.5} castShadow />
-        <directionalLight position={[5, 5, 5]} intensity={0.8} castShadow />
+        <ambientLight intensity={0.8} />
+        <pointLight position={[0, 8, 0]} intensity={0.9} castShadow />
+        <directionalLight position={[5, 5, 5]} intensity={0.9} castShadow />
         
         {/* Room with all walls */}
         <Room 
