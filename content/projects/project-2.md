@@ -1,7 +1,7 @@
 ---
 title: Digital Landscape
 description: A procedurally generated landscape that evolves over time
-thumbnail: /images/project-2-thumb.svg
+thumbnail: /images/all3.jpg
 wall: 0
 positionX: 0
 positionY: 1

@@ -14,6 +14,7 @@ import {
 import { WallType, ProjectType, ScrollState, AnimationState } from '../types';
 import { getWallCameraPosition, getNextWallId } from '../utils/gallery';
 import * as THREE from 'three';
+import gsap from 'gsap';
 
 // Use local Space Grotesk font for Three.js Text components
 const fontUrl = '/fonts/SpaceGrotesk-VariableFont_wght.ttf';
@@ -92,7 +93,7 @@ function Wall({ wall, projects, isActive, onProjectClick }: WallProps) {
     const texture = new THREE.TextureLoader().load('/textures/wall/Wallpaper001B_1K-JPG_Color.jpg');
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(4, 2);
+    texture.repeat.set(8, 4); // Increased tiling frequency - smaller chunks
     return texture;
   }, []);
   
@@ -167,6 +168,24 @@ function Wall({ wall, projects, isActive, onProjectClick }: WallProps) {
   );
 }
 
+// Helper component for loading project image texture and applying material
+function ProjectImageMaterial({ thumbnailUrl, hovered }: { thumbnailUrl: string; hovered: boolean }) {
+  const texture = useLoader(THREE.TextureLoader, thumbnailUrl);
+  
+  // Ensure the texture repeats if necessary, though for a single image it might not be.
+  // texture.wrapS = texture.wrapT = THREE.RepeatWrapping; // Example if tiling needed
+  // texture.repeat.set(1, 1);
+
+  return (
+    <meshLambertMaterial
+      map={texture}
+      emissive={hovered ? "#fff" : "#aaa"}
+      emissiveIntensity={hovered ? 0.4 : 0.1}
+      // transparent={true} // Add if images have alpha and need transparency
+    />
+  );
+}
+
 // Project component (painting on the wall)
 interface ProjectProps {
   project: ProjectType;
@@ -174,14 +193,17 @@ interface ProjectProps {
   isActive: boolean;
 }
 
-// Store loaded textures to avoid reloading
-const textureCache: Record<string, THREE.Texture> = {};
-
 function Project({ project, onClick, isActive }: ProjectProps) {
   const [hovered, setHovered] = useState(false);
   const meshRef = useRef<THREE.Mesh>(null);
-  
-  // Generate a consistent color based on project id for the fallback
+
+  const thumbnailPath = useMemo(() => {
+    if (!project.thumbnail) return '';
+    return project.thumbnail.startsWith('/')
+      ? project.thumbnail
+      : `/${project.thumbnail}`;
+  }, [project.thumbnail]);
+
   const projectColor = useMemo(() => {
     const hash = project.id.split('').reduce((acc, char) => {
       return char.charCodeAt(0) + ((acc << 5) - acc);
@@ -193,39 +215,32 @@ function Project({ project, onClick, isActive }: ProjectProps) {
       Math.abs(Math.sin(hash * 0.3)) * 0.5 + 0.5
     );
   }, [project.id]);
-  
-  // Create texture directly
-  const texture = useMemo(() => {
-    if (!project.thumbnail) return null;
-    
-    // Check cache first
-    if (textureCache[project.thumbnail]) {
-      return textureCache[project.thumbnail];
-    }
-    
-    // Create new texture
-    const newTexture = new THREE.TextureLoader().load(project.thumbnail);
-    textureCache[project.thumbnail] = newTexture;
-    return newTexture;
-  }, [project.thumbnail]);
-  
-  // Scale and position based on project configuration
+
   const { x, y, scale } = project.position;
-  
-  // Add hover animation
+
   useEffect(() => {
     if (!meshRef.current) return;
-    
-    if (hovered) {
-      meshRef.current.scale.set(scale * 1.05, scale * 1.05, 1);
-    } else {
-      meshRef.current.scale.set(scale, scale, 1);
-    }
+    const targetScale = hovered ? scale * 1.05 : scale;
+    gsap.to(meshRef.current.scale, {
+      x: targetScale,
+      y: targetScale,
+      z: 1,
+      duration: 0.3,
+      ease: "power2.out"
+    });
   }, [hovered, scale]);
-  
+
+  const fallbackMaterial = (
+    <meshStandardMaterial
+      color={projectColor}
+      emissive={hovered ? "#fff" : "#aaa"}
+      emissiveIntensity={hovered ? 0.4 : 0.1}
+    />
+  );
+
   return (
-    <group 
-      position={[x, y, 0.1]} 
+    <group
+      position={[x, y, 0.1]}
       onClick={onClick}
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
@@ -235,18 +250,19 @@ function Project({ project, onClick, isActive }: ProjectProps) {
         <boxGeometry args={[2.2 * scale, 1.5 * scale, 0.1]} />
         <meshStandardMaterial color="#222" />
       </mesh>
-      
+
       {/* Project thumbnail */}
-      <mesh ref={meshRef} castShadow>
+      <mesh ref={meshRef} castShadow position={[0, 0, 0.041]}>
         <planeGeometry args={[2 * scale, 1.3 * scale]} />
-        <meshStandardMaterial 
-          map={texture}
-          color={!texture ? projectColor : "#ffffff"}
-          emissive={hovered ? "#fff" : "#aaa"}
-          emissiveIntensity={hovered ? 0.4 : 0.1}
-        />
+        {thumbnailPath ? (
+          <React.Suspense fallback={fallbackMaterial}>
+            <ProjectImageMaterial thumbnailUrl={thumbnailPath} hovered={hovered} />
+          </React.Suspense>
+        ) : (
+          fallbackMaterial
+        )}
       </mesh>
-      
+
       {/* Project title */}
       <Text
         font={fontUrl}
