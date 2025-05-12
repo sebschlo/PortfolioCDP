@@ -8,7 +8,10 @@ import { ProjectType } from '@/app/types';
 
 async function convertMarkdownToHtml(markdown: string): Promise<string> {
   try {
-    const result = await remark().use(html).process(markdown);
+    // Configure remark-html to preserve raw HTML from the markdown
+    const result = await remark()
+      .use(html, { sanitize: false }) // Disable sanitization to preserve raw HTML
+      .process(markdown);
     return result.toString();
   } catch (error) {
     console.error('Error converting markdown to HTML:', error);
