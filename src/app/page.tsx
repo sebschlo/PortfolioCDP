@@ -141,6 +141,45 @@ export default function Home() {
         />
       )}
       
+      {/* Website Title */}
+      <div style={{
+        position: 'fixed',
+        top: '1rem',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        backgroundColor: 'rgba(0, 0, 0, 0.32)',
+        paddingLeft: '2.5rem',
+        paddingRight: '2.5rem',
+        paddingTop: '2.5rem',
+        paddingBottom: '2.5rem',
+        borderRadius: '9999px',
+        zIndex: 50,
+        visibility: selectedProject ? 'hidden' : 'visible',
+        textAlign: 'center'
+      }}>
+        <h1 style={{ 
+          color: 'white', 
+          margin: 0,
+          fontSize: '1.5rem',
+          fontWeight: 700,
+          fontFamily: 'Space Grotesk, sans-serif',
+          marginBottom: '0.5rem',
+          letterSpacing: '0.05em'
+        }}>
+          MS.CDP 2025 Portfolio
+        </h1>
+        <h2 style={{
+          color: 'rgba(255, 255, 255, 0.85)',
+          margin: 0,
+          fontSize: '1.25rem',
+          fontWeight: 500,
+          fontFamily: 'Space Grotesk, sans-serif',
+          letterSpacing: '0.03em'
+        }}>
+          Sebastian Schloesser
+        </h2>
+      </div>
+      
       {/* Wall navigation dots */}
       <div style={{
         position: 'fixed',
@@ -172,7 +211,7 @@ export default function Home() {
       {/* Wall name indicator */}
       <div style={{
         position: 'fixed',
-        top: '2rem',
+        bottom: '4rem',
         left: '50%',
         transform: 'translateX(-50%)',
         backgroundColor: 'rgba(0, 0, 0, 0.6)',
