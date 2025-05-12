@@ -3,7 +3,7 @@ title: GIS Explorations
 description: Using machine learning and cartographic techniques to speculate about the nature of data
 thumbnail: /images/map.jpg
 wall: 3
-positionX: 0
+positionX: -1.5
 positionY: 3
 scale: 1.6
 ---

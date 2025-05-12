@@ -3,8 +3,8 @@ title: Trolley Problem
 description: A zine on Generative AI
 thumbnail: /images/TrainBG.png
 wall: 3
-positionX: 7
-positionY: 0
+positionX: -1.5
+positionY: -2
 scale: 1.6
 ---
 

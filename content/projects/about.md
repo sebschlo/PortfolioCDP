@@ -3,9 +3,9 @@ title: About
 description: My thoughts on Computational Design Practice
 thumbnail: /images/cdp.png
 wall: 0
-positionX: 5
+positionX: -3
 positionY: 0
-scale: 2
+scale: 3
 ---
 
 # Interactive Installation

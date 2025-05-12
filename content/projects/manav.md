@@ -3,9 +3,9 @@ title: Manav
 description: Posture-based furniture design
 thumbnail: /images/manav.png
 wall: 1
-positionX: 5
+positionX: 6.5
 positionY: 2.5
-scale: 1.9
+scale: 2.2
 ---
 
 # Augmented Reality Experience

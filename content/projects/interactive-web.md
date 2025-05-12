@@ -5,7 +5,7 @@ thumbnail: /images/web.png
 wall: 3
 positionX: -7
 positionY: 0
-scale: 1.6
+scale: 1.8
 ---
 
 # Interactive Installation

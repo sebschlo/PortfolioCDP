@@ -3,9 +3,9 @@ title: Leo Tuvalu
 description: A spatial audio index into archival memories
 thumbnail: /images/leo-tuvalu.png
 wall: 2
-positionX: 4
+positionX: 6
 positionY: 1.5
-scale: 1.9
+scale: 2.2
 ---
 
 # Digital Landscape

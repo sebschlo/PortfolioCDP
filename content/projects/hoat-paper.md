@@ -3,9 +3,9 @@ title: Kurokawa and Metabolism Theory
 description: An analysis of the text 'Metabolism in Architecture' by Kisho Kurokawa
 thumbnail: /images/Kurokawa.png
 wall: 1
-positionX: -6
+positionX: -2
 positionY: -2.5
-scale: 1.7
+scale: 1.9
 ---
 
 # Augmented Reality Experience

@@ -3,9 +3,9 @@ title: Reinventing the Row
 description: Speculating on alternatives to the NYC row home "light court"
 thumbnail: /images/shaft_lighting.png
 wall: 3
-positionX: 0
-positionY: -2
-scale: 1.6
+positionX: 3.5
+positionY: 0
+scale: 1.8
 ---
 
 # Digital Landscape
