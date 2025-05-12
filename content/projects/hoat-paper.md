@@ -8,5 +8,6 @@ positionY: -2.5
 scale: 1.9
 ---
 
-# Read Paper
+## Paper for History of Architecture Theory course by Mark Wigley
+
 [View Paper Here](/files/KurokawaMetabolism.pdf)

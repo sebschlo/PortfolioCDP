@@ -47,36 +47,6 @@ export default function ProjectDetail({ project: initialProject, onClose }: Proj
   const handleWheel = (e: React.WheelEvent) => {
     e.stopPropagation();
   };
-
-  // Process content after render to make all links open in new tabs
-  useEffect(() => {
-    if (!contentRef.current || !project.content) return;
-    
-    // Make all links open in a new tab
-    const links = contentRef.current.querySelectorAll('a');
-    links.forEach(link => {
-      link.setAttribute('target', '_blank');
-      link.setAttribute('rel', 'noopener noreferrer');
-    });
-
-    // Fix embedded YouTube iframes that might be present
-    const iframes = contentRef.current.querySelectorAll('iframe');
-    iframes.forEach(iframe => {
-      // Ensure all iframes have allowFullScreen attribute
-      iframe.setAttribute('allowFullScreen', 'true');
-      
-      // Make sure YouTube iframes work correctly
-      const src = iframe.getAttribute('src');
-      if (src && src.includes('youtube.com')) {
-        let newSrc = src;
-        // Fix &amp; encoding issues
-        if (newSrc.includes('&amp;')) {
-          newSrc = newSrc.replace(/&amp;/g, '&');
-        }
-        iframe.setAttribute('src', newSrc);
-      }
-    });
-  }, [project.content]);
   
   return (
     <div 

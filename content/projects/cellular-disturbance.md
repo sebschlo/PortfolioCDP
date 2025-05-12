@@ -8,10 +8,6 @@ positionY: -2.5
 scale: 1.7
 ---
 
-# Cellular Disturbance
-
-## Sebastian Schloesser
-
 ### Description
 Manifesting the presence and severity of cell phone distraction
 through the physical mediums of water and light. This lamp consists of
@@ -26,11 +22,11 @@ water more vigorously the higher the reported screen time.
 
 ### Photos/Diagrams
 #### Inspiration from lighting effect used in Blade Runner 2049
-![Inspiration from lighting effect used in Blade Runner 2049](img/inspo.jpg)
+![Inspiration from lighting effect used in Blade Runner 2049](/images/cellular/inspo.jpg)
 #### Rendering of proposed Lamp.
-![Rendering of proposed Lamp.](img/rendering.png)
+![Rendering of proposed Lamp.](/images/cellular/rendering.png)
 #### Diagram of mechanism.
-![Diagram of mechanism.](img/diagram.png)
+![Diagram of mechanism.](/images/cellular/diagram.png)
 
 ### Attentional Theory
 I believe attention needs to be cultivated continously in life. It
