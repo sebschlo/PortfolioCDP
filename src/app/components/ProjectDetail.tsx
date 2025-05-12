@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ProjectType } from '../types';
 
 interface ProjectDetailProps {
@@ -6,8 +6,32 @@ interface ProjectDetailProps {
   onClose: () => void;
 }
 
-export default function ProjectDetail({ project, onClose }: ProjectDetailProps) {
+export default function ProjectDetail({ project: initialProject, onClose }: ProjectDetailProps) {
+  const [project, setProject] = useState<ProjectType>(initialProject);
+  const [loading, setLoading] = useState<boolean>(true);
   const contentRef = useRef<HTMLDivElement>(null);
+
+  // Fetch full project content when component mounts
+  useEffect(() => {
+    async function fetchFullProjectContent() {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/project/${initialProject.id}`);
+        if (response.ok) {
+          const fullProject = await response.json();
+          setProject(fullProject);
+        } else {
+          console.error('Failed to fetch full project content');
+        }
+      } catch (error) {
+        console.error('Error fetching project content:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchFullProjectContent();
+  }, [initialProject.id]);
 
   // Disable background scrolling when modal is open
   useEffect(() => {
@@ -26,7 +50,7 @@ export default function ProjectDetail({ project, onClose }: ProjectDetailProps) 
 
   // Process content after render to make all links open in new tabs
   useEffect(() => {
-    if (!contentRef.current) return;
+    if (!contentRef.current || !project.content) return;
     
     // Make all links open in a new tab
     const links = contentRef.current.querySelectorAll('a');
@@ -290,13 +314,36 @@ export default function ProjectDetail({ project, onClose }: ProjectDetailProps) 
                 display: block;
                 margin-top: 1em;
               }
+              .loading-spinner {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 2rem;
+                height: 200px;
+              }
+              .loading-spinner:after {
+                content: '';
+                width: 40px;
+                height: 40px;
+                border: 4px solid rgba(255, 255, 255, 0.3);
+                border-radius: 50%;
+                border-top-color: white;
+                animation: spin 0.8s ease-in-out infinite;
+              }
+              @keyframes spin {
+                to { transform: rotate(360deg); }
+              }
             `}
           </style>
-          <div 
-            ref={contentRef}
-            className="markdown-content"
-            dangerouslySetInnerHTML={{ __html: project.content }}
-          />
+          {loading ? (
+            <div className="loading-spinner" />
+          ) : (
+            <div 
+              ref={contentRef}
+              className="markdown-content"
+              dangerouslySetInnerHTML={{ __html: project.content }}
+            />
+          )}
         </div>
       </div>
     </div>

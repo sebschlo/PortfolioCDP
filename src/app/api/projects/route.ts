@@ -19,11 +19,11 @@ async function convertMarkdownToHtml(markdown: string): Promise<string> {
   }
 }
 
-async function getProjectData(id: string): Promise<ProjectType | null> {
+async function getProjectMetadata(id: string): Promise<ProjectType | null> {
   try {
     const filePath = path.join(process.cwd(), 'content', 'projects', `${id}.md`);
     const fileContent = await fs.readFile(filePath, 'utf8');
-    const { data, content } = matter(fileContent);
+    const { data } = matter(fileContent);
 
     // Validate required fields
     if (!data.title || !data.description || data.wall === undefined) {
@@ -31,8 +31,7 @@ async function getProjectData(id: string): Promise<ProjectType | null> {
       return null;
     }
 
-    const htmlContent = await convertMarkdownToHtml(content);
-
+    // Return just the metadata without content for faster loading
     return {
       id,
       title: data.title,
@@ -44,7 +43,7 @@ async function getProjectData(id: string): Promise<ProjectType | null> {
         y: data.positionY || 0,
         scale: data.scale || 1,
       },
-      content: htmlContent,
+      content: '', // Skip content for the list view
     };
   } catch (error) {
     console.error(`Error loading project ${id}:`, error);
@@ -62,7 +61,7 @@ export async function GET() {
       projectFiles.map(async (file) => {
         try {
           const id = path.basename(file, '.md');
-          const project = await getProjectData(id);
+          const project = await getProjectMetadata(id);
           return project;
         } catch (error) {
           console.error(`Error processing project file ${file}:`, error);
