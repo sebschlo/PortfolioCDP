@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ProjectType, GalleryScene, WallType } from './types';
-import useScroll from './hooks/useScroll';
+import useSwipe from './hooks/useSwipe';
 import Gallery3D from './components/Gallery3D';
 import IntroVideo from './components/IntroVideo';
 import ProjectDetail from './components/ProjectDetail';
@@ -16,6 +16,8 @@ export default function Home() {
   const [showIntro, setShowIntro] = useState(true);
   const [transitioning, setTransitioning] = useState(false);
   const [showUI, setShowUI] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showSwipeInstructions, setShowSwipeInstructions] = useState(true);
 
   useEffect(() => {
     console.log(`Home EFFECT state update: Loading: ${loading}, ShowIntro: ${showIntro}, ShowUI: ${showUI}, Transitioning: ${transitioning}`);
@@ -23,7 +25,7 @@ export default function Home() {
   
   const containerRef = useRef<HTMLDivElement>(null);
   
-  const { scrollState, goToWall, setEnabled: setScrollEnabled } = useScroll({ 
+  const { scrollState, goToWall, setEnabled: setScrollEnabled } = useSwipe({ 
     totalWalls: 4,
     scrollContainerRef: containerRef,
     initialWall: 0
@@ -111,6 +113,59 @@ export default function Home() {
       console.log('[Home DEBUG] UNMOUNT');
     };
   }, []);
+  
+  // Update the mobile detection effect
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+      
+      // Add a class to body based on screen width that we can use for CSS adjustments
+      if (window.innerWidth <= 768) {
+        document.body.classList.add('is-mobile');
+      } else {
+        document.body.classList.remove('is-mobile');
+      }
+    };
+    
+    // Run on mount
+    checkMobile();
+    
+    // Add event listener for resize
+    window.addEventListener('resize', checkMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
+  
+  // Effect to hide swipe instructions after 5 seconds
+  useEffect(() => {
+    if (showUI && !selectedProject) {
+      // Show the instructions when UI becomes visible
+      setShowSwipeInstructions(true);
+      
+      // Hide them after 5 seconds
+      const timer = setTimeout(() => {
+        setShowSwipeInstructions(false);
+      }, 5000);
+      
+      // Clear timer on cleanup
+      return () => clearTimeout(timer);
+    }
+  }, [showUI, selectedProject]);
+  
+  // Show swipe instructions again when changing walls
+  useEffect(() => {
+    if (showUI && !selectedProject) {
+      setShowSwipeInstructions(true);
+      
+      const timer = setTimeout(() => {
+        setShowSwipeInstructions(false);
+      }, 5000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [scrollState.currentWall]);
   
   if (loading) {
     console.log("Home rendering: LOADING_SCREEN");
@@ -266,6 +321,38 @@ export default function Home() {
                 }}>
                   {galleryScene.walls[scrollState.currentWall]?.name || 'Gallery'}
                 </h2>
+              </div>
+              
+              {/* Swipe instruction message */}
+              <div style={{
+                position: 'fixed',
+                bottom: isMobile ? '5rem' : '7rem',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                padding: isMobile ? '0.3rem 0.7rem' : '0.5rem 1rem',
+                borderRadius: '9999px',
+                zIndex: 50,
+                visibility: selectedProject || !showSwipeInstructions ? 'hidden' : 'visible',
+                opacity: showSwipeInstructions ? 1 : 0,
+                transition: 'opacity 0.5s ease-in-out',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                <svg width={isMobile ? "16" : "20"} height={isMobile ? "16" : "20"} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 2L17 12L7 22" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span style={{ 
+                  color: 'white', 
+                  fontSize: isMobile ? '0.75rem' : '0.875rem',
+                  fontFamily: 'Space Grotesk, sans-serif'
+                }}>
+                  Swipe to navigate
+                </span>
+                <svg width={isMobile ? "16" : "20"} height={isMobile ? "16" : "20"} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M17 2L7 12L17 22" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </div>
             </>
           )}

@@ -9,7 +9,22 @@ interface ProjectDetailProps {
 export default function ProjectDetail({ project: initialProject, onClose }: ProjectDetailProps) {
   const [project, setProject] = useState<ProjectType>(initialProject);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
   const contentRef = useRef<HTMLDivElement>(null);
+
+  // Detect mobile screens
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
 
   // Fetch full project content when component mounts
   useEffect(() => {
@@ -61,7 +76,7 @@ export default function ProjectDetail({ project: initialProject, onClose }: Proj
         alignItems: 'center',
         justifyContent: 'center',
         zIndex: 1000,
-        padding: '20px',
+        padding: isMobile ? '10px' : '20px',
         fontFamily: 'Space Grotesk, sans-serif'
       }}
       onClick={onClose}
@@ -71,8 +86,8 @@ export default function ProjectDetail({ project: initialProject, onClose }: Proj
           backgroundColor: '#1a1a1a',
           borderRadius: '8px',
           width: '100%',
-          maxWidth: '60%',
-          maxHeight: '90vh',
+          maxWidth: isMobile ? '95%' : '90%',
+          maxHeight: isMobile ? '95vh' : '90vh',
           overflow: 'auto',
           position: 'relative',
           zIndex: 1001,
@@ -84,7 +99,7 @@ export default function ProjectDetail({ project: initialProject, onClose }: Proj
         {/* Header */}
         <div style={{ position: 'relative' }}>
           {/* Project Image */}
-          <div style={{ height: '250px', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ height: isMobile ? '200px' : '250px', position: 'relative', overflow: 'hidden' }}>
             <img 
               src={project.thumbnail} 
               alt={project.title} 
@@ -115,8 +130,8 @@ export default function ProjectDetail({ project: initialProject, onClose }: Proj
               color: 'white',
               border: 'none',
               borderRadius: '50%',
-              width: '40px',
-              height: '40px',
+              width: isMobile ? '36px' : '40px',
+              height: isMobile ? '36px' : '40px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -132,9 +147,9 @@ export default function ProjectDetail({ project: initialProject, onClose }: Proj
           </button>
           
           {/* Project Title */}
-          <div style={{ position: 'absolute', bottom: 0, left: 0, padding: '24px' }}>
+          <div style={{ position: 'absolute', bottom: 0, left: 0, padding: isMobile ? '16px' : '24px' }}>
             <h1 style={{ 
-              fontSize: '30px', 
+              fontSize: isMobile ? '24px' : '30px', 
               fontWeight: 'bold', 
               color: 'white',
               margin: 0,
@@ -145,6 +160,7 @@ export default function ProjectDetail({ project: initialProject, onClose }: Proj
             <p style={{ 
               color: '#cccccc', 
               marginTop: '8px',
+              fontSize: isMobile ? '14px' : '16px',
               fontFamily: 'Space Grotesk, sans-serif'
             }}>
               {project.description}
@@ -153,7 +169,7 @@ export default function ProjectDetail({ project: initialProject, onClose }: Proj
         </div>
         
         {/* Content */}
-        <div style={{ padding: '24px' }}>
+        <div style={{ padding: isMobile ? '16px' : '24px' }}>
           <style>
             {`
               .markdown-content {
@@ -302,6 +318,20 @@ export default function ProjectDetail({ project: initialProject, onClose }: Proj
               }
               @keyframes spin {
                 to { transform: rotate(360deg); }
+              }
+              @media (max-width: 768px) {
+                .markdown-content {
+                  font-size: 16px;
+                }
+                .markdown-content h1 {
+                  font-size: 1.75rem;
+                }
+                .markdown-content h2 {
+                  font-size: 1.4rem;
+                }
+                .markdown-content p {
+                  margin-bottom: 1em;
+                }
               }
             `}
           </style>
