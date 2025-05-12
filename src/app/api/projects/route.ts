@@ -38,7 +38,7 @@ async function getProjectMetadata(id: string): Promise<ProjectType | null> {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const projectsDir = path.join(process.cwd(), 'content', 'projects');
     const files = await fs.readdir(projectsDir);

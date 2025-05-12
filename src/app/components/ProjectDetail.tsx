@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ProjectType } from '../types';
+import Image from 'next/image';
 
 interface ProjectDetailProps {
   project: ProjectType;
@@ -100,12 +101,11 @@ export default function ProjectDetail({ project: initialProject, onClose }: Proj
         <div style={{ position: 'relative' }}>
           {/* Project Image */}
           <div style={{ height: isMobile ? '200px' : '250px', position: 'relative', overflow: 'hidden' }}>
-            <img 
+            <Image 
               src={project.thumbnail} 
               alt={project.title} 
+              fill
               style={{ 
-                width: '100%', 
-                height: '100%', 
                 objectFit: 'cover', 
                 objectPosition: 'center'
               }}

@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { ScrollState, ProjectType } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 
 interface VideoGalleryProps {
   scrollState: ScrollState;
@@ -98,9 +99,11 @@ export default function VideoGallery({
                 className="project-gallery bg-black bg-opacity-70 p-4 rounded-lg border border-white border-opacity-20"
                 style={{ width: `${project.position.scale * 300}px` }}
               >
-                <img 
+                <Image 
                   src={project.thumbnail} 
                   alt={project.title}
+                  width={project.position.scale * 300}
+                  height={200}
                   className="w-full h-auto mb-2 rounded"
                 />
                 <h3 className="text-white text-lg font-bold">{project.title}</h3>

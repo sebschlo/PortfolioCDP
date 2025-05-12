@@ -35,16 +35,6 @@ export default function useSwipe({
   
   // Sensitivity factor for gradual movement
   const swipeSensitivity = 0.005;
-  
-  // Screen width for calculating relative swipe distances
-  const [screenWidth, setScreenWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1000);
-  
-  // Update screen width on resize
-  useEffect(() => {
-    const handleResize = () => setScreenWidth(window.innerWidth);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   // Handle touch start
   const handleTouchStart = useCallback((e: TouchEvent) => {
