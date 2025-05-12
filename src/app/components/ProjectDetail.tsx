@@ -90,6 +90,7 @@ export default function ProjectDetail({ project: initialProject, onClose }: Proj
           maxWidth: isMobile ? '95%' : '60%',
           maxHeight: isMobile ? '95vh' : '90vh',
           overflow: 'auto',
+          overflowX: 'hidden',
           position: 'relative',
           zIndex: 1001,
           fontFamily: 'Space Grotesk, sans-serif'
@@ -176,6 +177,16 @@ export default function ProjectDetail({ project: initialProject, onClose }: Proj
                 color: white;
                 font-family: 'Space Grotesk', sans-serif;
                 line-height: 1.6;
+                overflow-wrap: break-word;
+                word-wrap: break-word;
+                word-break: break-word;
+                max-width: 100%;
+                overflow-x: hidden;
+                box-sizing: border-box;
+              }
+              .markdown-content * {
+                box-sizing: border-box;
+                max-width: 100%;
               }
               .markdown-content h1, 
               .markdown-content h2, 
@@ -187,6 +198,7 @@ export default function ProjectDetail({ project: initialProject, onClose }: Proj
                 font-family: 'Space Grotesk', sans-serif;
                 margin-top: 1.5em;
                 margin-bottom: 0.75em;
+                max-width: 100%;
               }
               .markdown-content h1 {
                 font-size: 2rem;
@@ -199,11 +211,13 @@ export default function ProjectDetail({ project: initialProject, onClose }: Proj
               }
               .markdown-content p {
                 margin-bottom: 1.2em;
+                max-width: 100%;
               }
               .markdown-content a {
                 color: #4da3ff;
                 text-decoration: none;
                 transition: color 0.2s ease;
+                word-break: break-all;
               }
               .markdown-content a:hover {
                 color: #80bdff;
@@ -229,16 +243,22 @@ export default function ProjectDetail({ project: initialProject, onClose }: Proj
                 padding: 0.2em 0.4em;
                 border-radius: 3px;
                 font-family: monospace;
+                word-break: break-all;
+                white-space: pre-wrap;
               }
               .markdown-content pre {
                 background-color: rgba(255, 255, 255, 0.1);
                 padding: 1em;
                 border-radius: 4px;
                 overflow-x: auto;
+                max-width: 100%;
+                -webkit-overflow-scrolling: touch;
+                white-space: pre-wrap;
               }
               .markdown-content pre code {
                 background-color: transparent;
                 padding: 0;
+                white-space: pre-wrap;
               }
               .markdown-content ul, .markdown-content ol {
                 padding-left: 2em;
@@ -248,6 +268,10 @@ export default function ProjectDetail({ project: initialProject, onClose }: Proj
                 border-collapse: collapse;
                 width: 100%;
                 margin: 1.5em 0;
+                display: block;
+                overflow-x: auto;
+                max-width: 100%;
+                -webkit-overflow-scrolling: touch;
               }
               .markdown-content table th, .markdown-content table td {
                 border: 1px solid #444;
@@ -322,6 +346,10 @@ export default function ProjectDetail({ project: initialProject, onClose }: Proj
               @media (max-width: 768px) {
                 .markdown-content {
                   font-size: 16px;
+                  overflow-x: hidden;
+                }
+                .markdown-content * {
+                  max-width: 100%;
                 }
                 .markdown-content h1 {
                   font-size: 1.75rem;
