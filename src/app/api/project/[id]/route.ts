@@ -69,18 +69,13 @@ async function getFullProjectData(id: string): Promise<ProjectType | null> {
   }
 }
 
-type RouteParams = {
-  params: {
-    id: string;
-  };
-};
-
 export async function GET(
   request: NextRequest,
-  { params }: RouteParams
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
+
     if (!id) {
       return NextResponse.json(
         { error: 'Project ID is required' },
@@ -89,7 +84,7 @@ export async function GET(
     }
 
     const project = await getFullProjectData(id);
-    
+
     if (!project) {
       return NextResponse.json(
         { error: 'Project not found' },

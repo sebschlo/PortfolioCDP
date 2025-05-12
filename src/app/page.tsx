@@ -112,8 +112,6 @@ export default function Home() {
     };
   }, []);
   
-  console.log(`Home rendering. Loading: ${loading}, ShowIntro: ${showIntro}`);
-
   if (loading) {
     console.log("Home rendering: LOADING_SCREEN");
     return (

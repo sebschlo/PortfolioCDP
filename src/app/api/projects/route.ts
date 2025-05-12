@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs/promises';
 import matter from 'gray-matter';
 import { ProjectType } from '@/app/types';
+import type { NextRequest } from 'next/server';
 
 
 async function getProjectMetadata(id: string): Promise<ProjectType | null> {
@@ -37,7 +38,7 @@ async function getProjectMetadata(id: string): Promise<ProjectType | null> {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const projectsDir = path.join(process.cwd(), 'content', 'projects');
     const files = await fs.readdir(projectsDir);
